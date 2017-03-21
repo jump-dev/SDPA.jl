@@ -16,12 +16,12 @@ official_download="http://downloads.sourceforge.net/project/sdpa/sdpa/sdpa_7.3.8
 
 #configure="./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --prefix=$HOME/sdpa --with-blas="${OB}" --with-lapack="${OB}""
 
-# FIXME replace Pkg.dir
-cxx_wrap_dir = Pkg.dir("CxxWrap","deps","usr","lib","cmake")
+sdpaname = "sdpa-7.3.8"
+sdpa_dir = joinpath(dirname(@__FILE__), "src", sdpaname)
+mumps_include_dir = joinpath(sdpa_dir, "mumps", "build", "include")
+cxx_wrap_dir = joinpath(dirname(@__FILE__), "..", "..", "CxxWrap", "deps", "usr", "lib", "cmake")
 
 sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"])
-
-sdpaname = "sdpa-7.3.8"
 
 provides(Sources,
         Dict(URI(official_download) => sdpawrap), unpacked_dir=sdpaname)
@@ -35,13 +35,20 @@ configureopts = AbstractString["CFLAGS=-funroll-all-loops", "CXXFLAGS=-funroll-a
 sdpasrcdir = joinpath(BinDeps.srcdir(sdpawrap), sdpaname)
 sdpaprefixdir = joinpath(BinDeps.usrdir(sdpawrap))
 sdpalibdir = joinpath(sdpaprefixdir, "lib")
-sdpaprefixdir = joinpath(BinDeps.usrdir(sdpawrap))
+target="libsdpa.$(Libdl.dlext)"
+sdpa_library = joinpath(sdpalibdir, target)
+mumps_dir = joinpath(sdpasrcdir, "mumps", "build")
+mumps_lib_dir = joinpath(mumps_dir, "lib")
+mumps_libseq_dir = joinpath(mumps_dir, "libseq")
+@show dmumps_lib = joinpath(mumps_dir, "lib", "libdmumps.a")
+@show mumps_common_lib = joinpath(mumps_dir, "lib", "libmumps_common.a")
+@show pord_lib = joinpath(mumps_dir, "lib", "libpord.a")
+@show mpiseq_lib = joinpath(mumps_dir, "libseq", "libmpiseq.a")
+@show mumps_dir
 
 prefix=joinpath(BinDeps.depsdir(sdpawrap), "usr")
-sdpawrap_srcdir = joinpath(BinDeps.depsdir(sdpawrap),"src","sdpawrap")
+sdpawrap_srcdir = joinpath(BinDeps.depsdir(sdpawrap), "src", "sdpawrap")
 sdpawrap_builddir = joinpath(BinDeps.depsdir(sdpawrap), "builds", "sdpa_wrap")
-
-target="libsdpa.$(Libdl.dlext)"
 
 makeopts = ["--", "-j", "$(Sys.CPU_CORES+2)"]
 
@@ -58,8 +65,10 @@ genopt = "Unix Makefiles"
   end
 end
 
+@show dmumps_lib
 sdpa_steps = @build_steps begin
-	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" $sdpawrap_srcdir`
+	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DDMUMPS_LIB="$dmumps_lib" -DMUMPS_COMMON_LIB="$mumps_common_lib" -DPORD_LIB="$pord_lib" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" -DMPISEQ_LIB="$mpiseq_lib" $sdpawrap_srcdir`
+    `ls`
 	`cmake --build . --config Release --target install $makeopts`
 end
 
@@ -70,17 +79,17 @@ provides(BuildProcess,
     CreateDirectory(sdpalibdir)
     @build_steps begin
         ChangeDirectory(sdpasrcdir)
-        FileRule(joinpath(sdpalibdir,"$target"),@build_steps begin
-                 pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
-                 pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
-                 pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
-                 `mv Makefile.am.1 Makefile.am`
-                 pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
-                 `rm configure.in`
-                 `autoreconf -i`
-                 `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$blas -lblas" --with-lapack="-L$lapack -llapack"`
+        FileRule(joinpath(sdpa_library),@build_steps begin
+            pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
+            pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
+            pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
+            `mv Makefile.am.1 Makefile.am`
+            pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
+            `rm configure.in`
+            `autoreconf -i`
+            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$blas -lblas" --with-lapack="-L$lapack -llapack"`
             `make`
-            `cp .libs/$target $sdpalibdir/$target`
+            `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
     end
     CreateDirectory(sdpawrap_builddir)

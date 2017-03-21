@@ -1,6 +1,9 @@
-project(SDPA)
+project(SDPAWrap)
 
 cmake_minimum_required(VERSION 2.8.12)
+
+# debug
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_MACOSX_RPATH 1)
@@ -12,10 +15,16 @@ if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=pentium4")
 endif()
 
+# CxxWrap_DIR is set by build.jl
 find_package(CxxWrap)
 
+# SDPA_DIR is set by build.jl
+include_directories(${SDPA_DIR})
+include_directories(${MUMPS_INCLUDE_DIR})
+
 add_library(sdpawrap SHARED sdpawrap.cpp)
-target_link_libraries(sdpawrap CxxWrap::cxx_wrap)
+# ${PORD_LIB}: PORD_LIB does not seem usefull
+target_link_libraries(sdpawrap CxxWrap::cxx_wrap ${SDPA_LIBRARY} -L${MUMPS_LIB_DIR} -ldmumps -lmumps_common -lpord -L${MUMPS_LIBSEQ_DIR} -lmpiseq -lgfortran -lm -lquadmath -lpthread)
 
 get_property(JULIA_LIBRARY TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_LINK_LIBRARIES)
 get_property(JULIA_INCLUDES TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
