@@ -1,4 +1,8 @@
 using BinDeps
+# If I do not do using CxxWrap, when BinDeps try dlopen on libsdpawrap.so, I get
+# ERROR: could not load library "~/.julia/v0.5/SDPA/deps/usr/lib/libsdpawrap"
+# libcxx_wrap.so.0: cannot open shared object file: No such file or directory
+using CxxWrap
 
 lib_prefix = @static is_windows() ? "" : "lib"
 libdir_opt = ""
@@ -61,24 +65,24 @@ end
 
 provides(BuildProcess,
 (@build_steps begin
-	GetSources(sdpawrap)
-	CreateDirectory(sdpaprefixdir)
-	CreateDirectory(sdpalibdir)
-	@build_steps begin
-		ChangeDirectory(sdpasrcdir)
-		FileRule(joinpath(sdpalibdir,"$target"),@build_steps begin
-            pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
-            pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
-            pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
-            `mv Makefile.am.1 Makefile.am`
-            pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
-            `rm configure.in`
-            `autoreconf -i`
-            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$blas -lblas" --with-lapack="-L$lapack -llapack"`
-			`make`
-			`cp .libs/$target $sdpalibdir/$target`
-		end)
-	end
+    GetSources(sdpawrap)
+    CreateDirectory(sdpaprefixdir)
+    CreateDirectory(sdpalibdir)
+    @build_steps begin
+        ChangeDirectory(sdpasrcdir)
+        FileRule(joinpath(sdpalibdir,"$target"),@build_steps begin
+                 pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
+                 pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
+                 pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
+                 `mv Makefile.am.1 Makefile.am`
+                 pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
+                 `rm configure.in`
+                 `autoreconf -i`
+                 `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$blas -lblas" --with-lapack="-L$lapack -llapack"`
+            `make`
+            `cp .libs/$target $sdpalibdir/$target`
+        end)
+    end
     CreateDirectory(sdpawrap_builddir)
     @build_steps begin
         ChangeDirectory(sdpawrap_builddir)
