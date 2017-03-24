@@ -40,11 +40,6 @@ sdpa_library = joinpath(sdpalibdir, target)
 mumps_dir = joinpath(sdpasrcdir, "mumps", "build")
 mumps_lib_dir = joinpath(mumps_dir, "lib")
 mumps_libseq_dir = joinpath(mumps_dir, "libseq")
-@show dmumps_lib = joinpath(mumps_dir, "lib", "libdmumps.a")
-@show mumps_common_lib = joinpath(mumps_dir, "lib", "libmumps_common.a")
-@show pord_lib = joinpath(mumps_dir, "lib", "libpord.a")
-@show mpiseq_lib = joinpath(mumps_dir, "libseq", "libmpiseq.a")
-@show mumps_dir
 
 prefix=joinpath(BinDeps.depsdir(sdpawrap), "usr")
 sdpawrap_srcdir = joinpath(BinDeps.depsdir(sdpawrap), "src", "sdpawrap")
@@ -65,9 +60,8 @@ genopt = "Unix Makefiles"
   end
 end
 
-@show dmumps_lib
 sdpa_steps = @build_steps begin
-	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DDMUMPS_LIB="$dmumps_lib" -DMUMPS_COMMON_LIB="$mumps_common_lib" -DPORD_LIB="$pord_lib" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" -DMPISEQ_LIB="$mpiseq_lib" $sdpawrap_srcdir`
+	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" $sdpawrap_srcdir`
     `ls`
 	`cmake --build . --config Release --target install $makeopts`
 end
@@ -80,6 +74,9 @@ provides(BuildProcess,
     @build_steps begin
         ChangeDirectory(sdpasrcdir)
         FileRule(joinpath(sdpa_library),@build_steps begin
+            # See https://sourceforge.net/p/sdpa/discussion/1393613/thread/1a6d8897/
+            pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumps/Makefile`, stdout="mumpsMakefile")
+            `mv mumpsMakefile mumps/Makefile`
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
             pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
