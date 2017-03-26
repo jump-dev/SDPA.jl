@@ -13,4 +13,6 @@ end
 
 wrap_modules(_l_sdpa_wrap)
 
+include("blockmat.jl")
+
 end # module

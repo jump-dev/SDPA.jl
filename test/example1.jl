@@ -35,4 +35,6 @@ SDPA.solve(p)
 @test isapprox(SDPA.getPrimalError(p), 3.569037697759986e-14)
 @test isapprox(SDPA.getDualError(p), 1.5276668818842154e-12)
 
+@show Matrix(SDPA.PrimalSolution(p))
+
 SDPA.terminate(p)
