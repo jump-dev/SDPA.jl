@@ -24,7 +24,7 @@ include_directories(${MUMPS_INCLUDE_DIR})
 
 add_library(sdpawrap SHARED sdpawrap.cpp)
 # ${PORD_LIB}: PORD_LIB does not seem usefull
-target_link_libraries(sdpawrap CxxWrap::cxx_wrap ${SDPA_LIBRARY} -L${MUMPS_LIB_DIR} -ldmumps -lmumps_common -lpord -L${MUMPS_LIBSEQ_DIR} -lmpiseq -lgfortran -lm -lquadmath -lpthread)
+target_link_libraries(sdpawrap CxxWrap::cxx_wrap ${SDPA_LIBRARY} -L${MUMPS_LIB_DIR} -ldmumps -lmumps_common -lpord -L${MUMPS_LIBSEQ_DIR} -lmpiseq -lgfortran -lm -lquadmath -lpthread -L${BLAS_DIR} -lblas -L${LAPACK_DIR} -llapack)
 
 get_property(JULIA_LIBRARY TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_LINK_LIBRARIES)
 get_property(JULIA_INCLUDES TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_INCLUDE_DIRECTORIES)

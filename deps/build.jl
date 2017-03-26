@@ -9,8 +9,8 @@ libdir_opt = ""
 
 @BinDeps.setup
 
-blas="/usr/lib/julia/libopenblas64_.so"
-lapack="/usr/lib/julia/libopenblas64_.so"
+blas = library_dependency("libblas", alias=["libblas.dll"])
+lapack = library_dependency("liblapack", alias=["liblapack.dll"])
 
 official_download="http://downloads.sourceforge.net/project/sdpa/sdpa/sdpa_7.3.8.tar.gz?r=&ts=1479039688&use_mirror=vorboss"
 
@@ -21,7 +21,7 @@ sdpa_dir = joinpath(dirname(@__FILE__), "src", sdpaname)
 mumps_include_dir = joinpath(sdpa_dir, "mumps", "build", "include")
 cxx_wrap_dir = joinpath(dirname(@__FILE__), "..", "..", "CxxWrap", "deps", "usr", "lib", "cmake")
 
-sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"])
+sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"], depends=[blas, lapack])
 
 provides(Sources,
         Dict(URI(official_download) => sdpawrap), unpacked_dir=sdpaname)
@@ -61,9 +61,8 @@ genopt = "Unix Makefiles"
 end
 
 sdpa_steps = @build_steps begin
-	`cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" $sdpawrap_srcdir`
-    `ls`
-	`cmake --build . --config Release --target install $makeopts`
+       `cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" -DBLAS_DIR="$(dirname(first(BinDeps._find_library(blas))[2]))" -DLAPACK_DIR="$(dirname(first(BinDeps._find_library(lapack))[2]))" $sdpawrap_srcdir`
+       `cmake --build . --config Release --target install $makeopts`
 end
 
 provides(BuildProcess,
@@ -84,7 +83,7 @@ provides(BuildProcess,
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
             `rm configure.in`
             `autoreconf -i`
-            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$blas -lblas" --with-lapack="-L$lapack -llapack"`
+            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$(first(BinDeps._find_library(blas))[2]) -lblas" --with-lapack="-L$(first(BinDeps._find_library(lapack))[2]) -llapack"`
             `make`
             `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)

@@ -32,11 +32,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("initializeUpperTriangle", &SDPA::initializeUpperTriangle)
         .method("initializeSolve", &SDPA::initializeSolve)
         .method("solve", &SDPA::solve)
-	    .method("getIteration", &SDPA::getIteration)
-	    .method("getPrimalObj", &SDPA::getPrimalObj)
-	    .method("getDualObj", &SDPA::getDualObj)
-	    .method("getPrimalError", &SDPA::getPrimalError)
-	    .method("getDualError", &SDPA::getDualError)
+        .method("getIteration", &SDPA::getIteration)
+        .method("getPrimalObj", &SDPA::getPrimalObj)
+        .method("getDualObj", &SDPA::getDualObj)
+        .method("getPrimalError", &SDPA::getPrimalError)
+        .method("getDualError", &SDPA::getDualError)
         .method("terminate", &SDPA::terminate);
 
 
