@@ -41,9 +41,9 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getDualObj", &SDPA::getDualObj)
         .method("getPrimalError", &SDPA::getPrimalError)
         .method("getDualError", &SDPA::getDualError)
-        //.method("getResultXMat", &SDPA::getResultXMat)
+        .method("getResultXMat", &SDPA::getResultXMat)
         .method("getResultXVec", &SDPA::getResultXVec)
-        //.method("getResultYMat", &SDPA::getResultYMat)
+        .method("getResultYMat", &SDPA::getResultYMat)
         .method("terminate", &SDPA::terminate);
 
 
