@@ -60,6 +60,8 @@ genopt = "Unix Makefiles"
   end
 end
 
+@show dirname(first(BinDeps._find_library(blas))[2])
+@show dirname(first(BinDeps._find_library(lapack))[2])
 sdpa_steps = @build_steps begin
        `cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCxxWrap_DIR="$cxx_wrap_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" -DMUMPS_LIB_DIR="$mumps_lib_dir" -DMUMPS_LIBSEQ_DIR="$mumps_libseq_dir" -DBLAS_DIR="$(dirname(first(BinDeps._find_library(blas))[2]))" -DLAPACK_DIR="$(dirname(first(BinDeps._find_library(lapack))[2]))" $sdpawrap_srcdir`
        `cmake --build . --config Release --target install $makeopts`
