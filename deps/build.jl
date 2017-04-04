@@ -87,7 +87,7 @@ provides(BuildProcess,
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
             `rm configure.in`
             `autoreconf -i`
-            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$(first(BinDeps._find_library(blas))[2]) -lblas" --with-lapack="-L$(first(BinDeps._find_library(lapack))[2]) -llapack"`
+            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="-L$(dirname(first(BinDeps._find_library(blas))[2])) -lblas" --with-lapack="-L$(dirname(first(BinDeps._find_library(lapack))[2])) -llapack"`
             `make`
             `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
