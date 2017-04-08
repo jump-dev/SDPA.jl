@@ -82,8 +82,7 @@ function fix64(flags)
         flags *= " -march=x86-64 -m64 -Dinteger=long"
         for f in FORTRAN_FUNCTIONS
             let ext=string(LinAlg.BLAS.@blasfunc "")
-                #flags *= " -D$(f)_=$(f)_$ext"
-                flags *= " -Dinnocuous_$(f)_=$(f)_$ext"
+                flags *= " -D$(f)_=$(f)_$ext"
             end
         end
         info(flags)
@@ -109,7 +108,16 @@ provides(BuildProcess,
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
             `mv Makefile.am.1 Makefile.am`
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
-            `rm configure.in`
+            # Short-circuit test because they do
+            # #define dgemm_ innocuous_dgemm_
+            # #include <limits.h>
+            # #undef dgemm_
+            # because "Define dgemm_ to an innocuous variant, in case <limits.h> declares dgemm_."
+            # For example, HP-UX 11i <limits.h> declares gettimeofday.
+            # This makes it impossible for us to pass it since we redefine dgemm_ as dgemm_64_
+            pipeline(`sed 's/HAVE_BLAS=""/HAVE_BLAS="yes"/' configure.ac`, stdout="configure.ac.1")
+            pipeline(`sed 's/HAVE_LAPACK=""/HAVE_LAPACK="yes"/' configure.ac.1`, stdout="configure.ac")
+            `rm configure.in configure.ac.1`
             `autoreconf -i`
             `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
