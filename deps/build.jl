@@ -54,7 +54,8 @@ function blas_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -lblas"
     else
-        "-L$(Libdl.dlpath(LinAlg.BLAS.libblas)) -lblas"
+        # I use [4:end] to drop the "lib" at the beginning
+        "-L$(dirname(Libdl.dlpath(LinAlg.BLAS.libblas))) -l$(LinAlg.BLAS.libblas[4:end])"
     end
 end
 
@@ -62,7 +63,8 @@ function lapack_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -llapack"
     else
-        "-L$(Libdl.dlpath(LinAlg.LAPACK.liblapack)) -llapack"
+        # I use [4:end] to drop the "lib" at the beginning
+        "-L$(dirname(Libdl.dlpath(LinAlg.LAPACK.liblapack))) -l$(LinAlg.LAPACK.liblapack[4:end])"
     end
 end
 
