@@ -22,7 +22,7 @@ sdpa_dir = joinpath(dirname(@__FILE__), "src", sdpaname)
 mumps_include_dir = joinpath(sdpa_dir, "mumps", "build", "include")
 cxx_wrap_dir = joinpath(dirname(@__FILE__), "..", "..", "CxxWrap", "deps", "usr", "lib", "cmake")
 
-sdpa = library_dependency("sdpa", aliases=["sdpa-7.3.9"], depends=depends)
+sdpa = library_dependency("sdpa", aliases=["libsdpa"], depends=depends)
 sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"], depends=[depends; sdpa])
 
 provides(Sources,
@@ -54,7 +54,7 @@ function blas_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -lblas"
     else
-        "-L$(Libdl.dlpath(LinAlg.BLAS.libblas))"
+        "-L$(Libdl.dlpath(LinAlg.BLAS.libblas)) -lblas"
     end
 end
 
@@ -62,7 +62,7 @@ function lapack_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -llapack"
     else
-        "-L$(Libdl.dlpath(LinAlg.LAPACK.liblapack))"
+        "-L$(Libdl.dlpath(LinAlg.LAPACK.liblapack)) -llapack"
     end
 end
 
@@ -89,7 +89,7 @@ provides(BuildProcess,
             `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
     end
-end), sdpa, os=:Windows)
+end), sdpa)
 
 # The zip on SDPA does not contain DLLs, only an EXE :(
 # provides(Binaries,
