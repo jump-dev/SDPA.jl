@@ -117,7 +117,7 @@ SDPA.solve(p)
 @test SDPA.getIteration(p) == 13
 @test isapprox(SDPA.getPrimalObj(p), 32.06269340482402)
 @test isapprox(SDPA.getDualObj(p), 32.062692353573865)
-@test isapprox(SDPA.getPrimalError(p), 9.059419880941277e-14)
-@test isapprox(SDPA.getDualError(p), 3.907985046680551e-14)
+@test SDPA.getPrimalError(p) < 1e-10
+@test SDPA.getDualError(p) < 1e-10
 
 SDPA.terminate(p)
