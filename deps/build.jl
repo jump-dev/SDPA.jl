@@ -49,13 +49,21 @@ sdpawrap_builddir = joinpath(BinDeps.depsdir(sdpawrap), "builds", "sdpa_wrap")
 
 makeopts = ["--", "-j", "$(Sys.CPU_CORES+2)"]
 
+const FORTRAN_FUNCTIONS =
+    [:dnrm2, :dasum, :ddot, :idamax, :dgemm, :dgemv, :dger,
+     :dtrsm, :dtrmv, :dpotrf, :dpotrs, :dpotri, :dtrtri]
+
 # It needs to be a function so that it is called only when blas and lapack dependencies have been resolved
+function ldflags(libname)
+    # I use [4:end] to drop the "lib" at the beginning
+    "-L$(dirname(Libdl.dlpath(libname))) -l$(libname[4:end])"
+end
+# Now I use Julia's LAPACK so it shouldn't change anything
 function blas_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -lblas"
     else
-        # I use [4:end] to drop the "lib" at the beginning
-        "-L$(dirname(Libdl.dlpath(LinAlg.BLAS.libblas))) -l$(LinAlg.BLAS.libblas[4:end])"
+        ldflags(LinAlg.BLAS.libblas)
     end
 end
 
@@ -63,8 +71,25 @@ function lapack_lib()
     if false
         "-L$(dirname(first(BinDeps._find_library(blas))[2])) -llapack"
     else
-        # I use [4:end] to drop the "lib" at the beginning
-        "-L$(dirname(Libdl.dlpath(LinAlg.LAPACK.liblapack))) -l$(LinAlg.LAPACK.liblapack[4:end])"
+        ldflags(LinAlg.LAPACK.liblapack)
+    end
+end
+
+function fix64(flags)
+    flags *= " -DCOPYAMATRIX -DDLONG -DCTRLC=1"
+    if Base.BLAS.vendor() == :openblas64
+        flags *= " -DBLAS64"
+        flags *= " -march=x86-64 -m64 -Dinteger=long"
+        for f in FORTRAN_FUNCTIONS
+            let ext=string(LinAlg.BLAS.@blasfunc "")
+                #flags *= " -D$(f)_=$(f)_$ext"
+                flags *= " -Dinnocuous_$(f)_=$(f)_$ext"
+            end
+        end
+        info(flags)
+        flags
+    else
+        flags
     end
 end
 
@@ -86,7 +111,7 @@ provides(BuildProcess,
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
             `rm configure.in`
             `autoreconf -i`
-            `./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
+            `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
             `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
