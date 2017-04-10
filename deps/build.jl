@@ -15,7 +15,7 @@ depends = [] # [blas, lapack]
 
 official_download="http://downloads.sourceforge.net/project/sdpa/sdpa/sdpa_7.3.8.tar.gz?r=&ts=1479039688&use_mirror=vorboss"
 
-#configure="./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FFLAGS=-funroll-all-loops --prefix=$HOME/sdpa --with-blas="${OB}" --with-lapack="${OB}""
+#configure="./configure CFLAGS=-funroll-all-loops CXXFLAGS=-funroll-all-loops FCFLAGS=-funroll-all-loops --prefix=$HOME/sdpa --with-blas="${OB}" --with-lapack="${OB}""
 
 sdpaname = "sdpa-7.3.8"
 sdpa_dir = joinpath(dirname(@__FILE__), "src", sdpaname)
@@ -31,8 +31,8 @@ provides(Sources,
 #includedirs = AbstractString[src_dir]
 #targetdirs = AbstractString["libsdpa.a"] #$(Libdl.dlext)"]
 #libdirs = AbstractString["/usr/lib/julia"]
-configureopts = AbstractString["CFLAGS=-funroll-all-loops", "CXXFLAGS=-funroll-all-loops", "FFLAGS=-funroll-all-loops"] #, "--with-blas=$blas", "--with-lapack=$lapack"] # FFLAGS=-funroll-all-loops"]
-#configureopts = AbstractString["CFLAGS='-funroll-all-loops' CXXFLAGS='-funroll-all-loops' FFLAGS='-funroll-all-loops' --with-blas=$blas --with-lapack=$lapack"]
+#configureopts = AbstractString["CFLAGS=-funroll-all-loops", "CXXFLAGS=-funroll-all-loops", "FCFLAGS=-funroll-all-loops"] #, "--with-blas=$blas", "--with-lapack=$lapack"] # FCFLAGS=-funroll-all-loops"]
+#configureopts = AbstractString["CFLAGS='-funroll-all-loops' CXXFLAGS='-funroll-all-loops' FCFLAGS='-funroll-all-loops' --with-blas=$blas --with-lapack=$lapack"]
 
 sdpasrcdir = joinpath(BinDeps.srcdir(sdpawrap), sdpaname)
 sdpaprefixdir = joinpath(BinDeps.usrdir(sdpawrap))
@@ -79,10 +79,13 @@ function fix64(flags)
     flags *= " -DCOPYAMATRIX -DDLONG -DCTRLC=1"
     if Base.BLAS.vendor() == :openblas64
         flags *= " -DBLAS64"
-        flags *= " -march=x86-64 -m64 -Dinteger=long"
+        flags *= " -march=x86-64 -m64"
+        # -Dinteger=long cannot be put in FCFLAGS
         for f in FORTRAN_FUNCTIONS
             let ext=string(LinAlg.BLAS.@blasfunc "")
-                flags *= " -D$(f)_=$(f)_$ext"
+                flags *= " -D$(f)_=$(f)_$(ext[1:end])"
+                # do not use the trailing _ in ext
+                flags *= " -D$(f)=$(f)_$(ext[1:end-1])"
             end
         end
         info(flags)
@@ -101,8 +104,9 @@ provides(BuildProcess,
         ChangeDirectory(sdpasrcdir)
         FileRule(joinpath(sdpa_library), @build_steps begin
             # See https://sourceforge.net/p/sdpa/discussion/1393613/thread/1a6d8897/
-            pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumps/Makefile`, stdout="mumpsMakefile")
-            `mv mumpsMakefile mumps/Makefile`
+            pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile")
+            pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumpsMakefile`, stdout="mumps/Makefile")
+            `rm mumpsMakefile`
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
             pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
@@ -119,7 +123,7 @@ provides(BuildProcess,
             pipeline(`sed 's/HAVE_LAPACK=""/HAVE_LAPACK="yes"/' configure.ac.1`, stdout="configure.ac")
             `rm configure.in configure.ac.1`
             `autoreconf -i`
-            `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
+            `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FCFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
             `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
