@@ -16,6 +16,9 @@ notifications:
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("SDPA"); Pkg.test("SDPA"; coverage=true)'
+before_install:
+  - brew uninstall libtool
+  - brew install libtool
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
