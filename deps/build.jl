@@ -79,7 +79,7 @@ function fix64(flags)
     flags *= " -DCOPYAMATRIX -DDLONG -DCTRLC=1"
     if Base.BLAS.vendor() == :openblas64
         flags *= " -DBLAS64"
-        flags *= " -march=x86-64 -m64"
+        flags *= " -march=x86-64 -m64 -fdefault-integer-8"
         # -Dinteger=long cannot be put in FCFLAGS
         for f in FORTRAN_FUNCTIONS
             let ext=string(LinAlg.BLAS.@blasfunc "")
