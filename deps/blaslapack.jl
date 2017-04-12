@@ -12,6 +12,10 @@ function ldflags(; libpath=Libdl.dlpath(libname), libname=first(split(basename(l
     libdir = dirname(libpath)
     # I use [4:end] to drop the "lib" at the beginning
     linkname = libname[4:end]
+    run(`ls $libdir`)
+    if isdir(joinpath(libdir, linkname))
+        run(`ls $libdir/$linkname`)
+    end
     info("Using $libname at $libpath : -L$libdir -l$linkname")
     # In Ubuntu, /usr/lib/lapack.so.3 is detected but we need to link to /usr/lib/lapack. To fix this, we add -L$libdir/$linkname
     "-L$libdir -L$libdir/$linkname -l$linkname"
@@ -21,6 +25,7 @@ function blas_lib()
     if JULIA_LAPACK
         ldflags(libname=LinAlg.BLAS.libblas)
     else
+        info(BinDeps._find_library(blas))
         ldflags(libpath=first(BinDeps._find_library(blas))[2])
     end
 end
@@ -29,6 +34,7 @@ function lapack_lib()
     if JULIA_LAPACK
         ldflags(libname=LinAlg.LAPACK.liblapack)
     else
+        info(BinDeps._find_library(lapack))
         ldflags(libpath=first(BinDeps._find_library(lapack))[2])
     end
 end
