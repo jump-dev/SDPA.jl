@@ -10,6 +10,7 @@ julia:
 addons:
   apt_packages:
     - gfortran
+    - liblapack-dev
     - libopenblas-dev
 notifications:
   email: false
