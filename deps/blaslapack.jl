@@ -8,27 +8,27 @@ lapack = library_dependency("liblapack", alias=["liblapack.dll"])
 depends = JULIA_LAPACK ? [] : [blas, lapack]
 
 # It will be called immediately, so if we add providers for blas/lapack, it won't work and BinDeps._find_library will return an empty vector
-function ldflags(libpath, libname)
+function ldflags(; libpath=Libdl.dlpath(libname), libname=first(rsplit(basename(libpath), '.', limit=2)))
+    libdir = dirname(libpath)
+    linkname = libname[4:end]
+    info("Using $libname at $libpath : -L$libdir -l$linkname")
     # I use [4:end] to drop the "lib" at the beginning
-    "-L$(dirname(libpath)) -l$(libname[4:end])"
-end
-function ldflags(libname)
-    ldflags(Libdl.dlpath(libname), libname)
+    "-L$libdir -l$linkname"
 end
 
 function blas_lib()
     if JULIA_LAPACK
-        ldflags(LinAlg.BLAS.libblas)
+        ldflags(libname=LinAlg.BLAS.libblas)
     else
-        ldflags(first(BinDeps._find_library(blas))[2], "libblas")
+        ldflags(libpath=first(BinDeps._find_library(blas))[2])
     end
 end
 
 function lapack_lib()
     if JULIA_LAPACK
-        ldflags(LinAlg.LAPACK.liblapack)
+        ldflags(libname=LinAlg.LAPACK.liblapack)
     else
-        ldflags(first(BinDeps._find_library(lapack))[2], "liblapack")
+        ldflags(libpath=first(BinDeps._find_library(lapack))[2])
     end
 end
 
