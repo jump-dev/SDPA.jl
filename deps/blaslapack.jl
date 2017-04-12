@@ -8,13 +8,13 @@ lapack = library_dependency("liblapack", alias=["liblapack.dll"])
 depends = JULIA_LAPACK ? [] : [blas, lapack]
 
 # It will be called immediately, so if we add providers for blas/lapack, it won't work and BinDeps._find_library will return an empty vector
-function ldflags(; libpath=Libdl.dlpath(libname), libname=first(rsplit(basename(libpath), '.', limit=2)))
+function ldflags(; libpath=Libdl.dlpath(libname), libname=first(split(basename(libpath), '.', limit=2)))
     libdir = dirname(libpath)
-    run(`ls $libdir`)
+    # I use [4:end] to drop the "lib" at the beginning
     linkname = libname[4:end]
     info("Using $libname at $libpath : -L$libdir -l$linkname")
-    # I use [4:end] to drop the "lib" at the beginning
-    "-L$libdir -l$linkname"
+    # In Ubuntu, /usr/lib/lapack.so.3 is detected but we need to link to /usr/lib/lapack. To fix this, we add -L$libdir/$linkname
+    "-L$libdir -L$libdir/$linkname -l$linkname"
 end
 
 function blas_lib()
