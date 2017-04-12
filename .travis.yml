@@ -10,6 +10,7 @@ julia:
 addons:
   apt_packages:
     - gfortran
+    - libopenblas-dev
 notifications:
   email: false
 # uncomment the following lines to override the default test script

@@ -12,7 +12,7 @@ type SDPAMathProgModel <: AbstractSDModel
     problem::SDPAProblem
     options::Dict{Symbol,Any}
     function SDPAMathProgModel(; kwargs...)
-        new(nothing, Dict{Symbol, Any}(kwargs))
+        new(SDPAProblem(), Dict{Symbol, Any}(kwargs))
     end
 end
 SDModel(s::SDPASolver) = SDPAMathProgModel(; s.options...)
@@ -59,9 +59,9 @@ function setobjentry!(m::SDPAMathProgModel, coef, blk::Integer, i::Integer, j::I
 end
 
 function optimize!(m::SDPAMathProgModel)
-    SDPA.initializeUpperTriangle(p, false)
-    SDPA.initializeSolve(p)
-    SDPA.solve(p)
+    SDPA.initializeUpperTriangle(m.problem, false)
+    SDPA.initializeSolve(m.problem)
+    SDPA.solve(m.problem)
 end
 
 function status(m::SDPAMathProgModel)

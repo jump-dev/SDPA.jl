@@ -14,5 +14,6 @@ end
 wrap_modules(_l_sdpa_wrap)
 
 include("blockmat.jl")
+include("SDPASolverInterface.jl")
 
 end # module
