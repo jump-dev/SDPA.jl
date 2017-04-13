@@ -4,12 +4,12 @@ mDIM   = 5
 nBlock = 3
 SDPA.inputConstraintNumber(p, mDIM)
 SDPA.inputBlockNumber(p, nBlock)
-SDPA.inputBlockSize(p, 1,2)
-SDPA.inputBlockSize(p, 2,3)
-SDPA.inputBlockSize(p, 3,-2)
-SDPA.inputBlockType(p, 1,SDPA.SDP)
-SDPA.inputBlockType(p, 2,SDPA.SDP)
-SDPA.inputBlockType(p, 3,SDPA.LP)
+SDPA.inputBlockSize(p, 1, 2)
+SDPA.inputBlockSize(p, 2, 3)
+SDPA.inputBlockSize(p, 3, -2)
+SDPA.inputBlockType(p, 1, SDPA.SDP)
+SDPA.inputBlockType(p, 2, SDPA.SDP)
+SDPA.inputBlockType(p, 3, SDPA.LP)
 
 SDPA.initializeUpperTriangleSpace(p)
 
@@ -114,10 +114,30 @@ SDPA.initializeSolve(p)
 
 SDPA.solve(p)
 
+# See Section 6.3 of
+# SDPA (SemiDefinite Programming Algorithm) User's Manual — Version 6.2.0
+# https://pdfs.semanticscholar.org/0332/d0044b09e1212e181bc422f390de05df0c88.pdf Section 6.3
+# for the values
 @test SDPA.getIteration(p) == 13
 @test isapprox(SDPA.getPrimalObj(p), 32.06269340482402)
 @test isapprox(SDPA.getDualObj(p), 32.062692353573865)
 @test SDPA.getPrimalError(p) < 1e-10
 @test SDPA.getDualError(p) < 1e-10
+
+X = SDPA.PrimalSolution(p)
+@test isapprox(X[1], [+6.392e-08 -9.638e-09;
+                      -9.638e-09 +4.539e-08], rtol=1e-4)
+@test isapprox(X[2], [+7.119e+00 +5.025e+00 +1.916e+00;
+                      +5.025e+00 +4.415e+00 +2.506e+00;
+                      +1.916e+00 +2.506e+00 +2.048e+00], rtol=1e-4)
+@test isapprox(X[3], Diagonal([+3.432e-01, +4.391e+00]), rtol=1e-4)
+
+Y = SDPA.VarDualSolution(p)
+@test isapprox(Y[1], [+2.640e+00 +5.606e-01;
+                      +5.606e-01 +3.718e+00], rtol=1e-4)
+@test isapprox(Y[2], [+7.616e-01 -1.514e+00 +1.139e+00;
+                      -1.514e+00 +3.008e+00 -2.264e+00;
+                      +1.139e+00 -2.264e+00 +1.705e+00], rtol=1e-3)
+@test isapprox(Y[3], Diagonal([+4.087e-07, +3.195e-08]), rtol=1e-4)
 
 SDPA.terminate(p)
