@@ -21,7 +21,5 @@ before_script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("SDPA"); Pkg.test("SDPA"; coverage=true)'
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-  # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  # push coverage results to Coveralls and Codecov
+  - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
