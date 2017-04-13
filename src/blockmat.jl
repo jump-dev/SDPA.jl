@@ -22,8 +22,10 @@ function Base.getindex(X::BlockSolution, blk::Integer)
         Diagonal(unsafe_wrap(Array, getptr(X, blk), (n,)))
     end
 end
-# Unused
 function Base.getindex(X::BlockSolution, i::Integer, j::Integer)
+    if i <= 0 || j <= 0 || max(i, j) > size(X, 1)
+        throw(BoundsError(X, (i, j)))
+    end
     for blk in 1:getBlockNumber(X.problem)
         n = getBlockSize(X.problem, blk)
         if i <= n && j <= n

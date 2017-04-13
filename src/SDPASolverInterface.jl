@@ -28,12 +28,6 @@ end
 
 function loadproblem!(m::SDPAMathProgModel, filename::AbstractString)
     error("not supported yet")
-    if endswith(filename,".dat-s")
-       m.C, m.b, As = read_prob(filename)
-       m.As = [ConstraintMatrix(As[i], i) for i in 1:length(As)]
-    else
-       error("unrecognized input format extension in $filename")
-    end
 end
 #writeproblem(m, filename::String)
 function loadproblem!(m::SDPAMathProgModel, blkdims::Vector{Int}, constr::Int)
@@ -87,8 +81,6 @@ function status(m::SDPAMathProgModel)
         return :Unbounded
     elseif status == dUNBD
         return :Infeasible
-    else
-        error("Internal library error: status=$status")
     end
 end
 

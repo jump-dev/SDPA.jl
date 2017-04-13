@@ -133,11 +133,22 @@ X = SDPA.VarDualSolution(p)
 @test isapprox(X[3], Diagonal([+3.432e-01, +4.391e+00]), rtol=1e-4)
 
 Y = SDPA.PrimalSolution(p)
+@test size(Y) == (7, 7)
+@test Y[1, 3] == 0
+@test_throws BoundsError Y[1, 0]
+@test_throws BoundsError Y[8, 2]
+@test_throws BoundsError Y[1][0, 1]
+@test_throws BoundsError Y[1][1, 3]
 @test isapprox(Y[1], [+2.640e+00 +5.606e-01;
                       +5.606e-01 +3.718e+00], rtol=1e-4)
+@test isapprox(Y[6, 6], +4.087e-07, rtol=1e-4)
 @test isapprox(Y[2], [+7.616e-01 -1.514e+00 +1.139e+00;
                       -1.514e+00 +3.008e+00 -2.264e+00;
                       +1.139e+00 -2.264e+00 +1.705e+00], rtol=1e-3)
+@test isapprox(Y[4, 3], -1.514e+00, rtol=1e-3)
 @test isapprox(Y[3], Diagonal([+4.087e-07, +3.195e-08]), rtol=1e-4)
+@test isapprox(Y[6, 6], +4.087e-07, rtol=1e-4)
+@show Y[6, 7]
+@test Y[6, 7] == 0
 
 SDPA.terminate(p)
