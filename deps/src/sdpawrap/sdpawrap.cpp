@@ -1,25 +1,32 @@
 #include <cxx_wrap.hpp>
 #include <sdpa_call.h>
 
-std::string greet()
-{
-   return "hello, world";
-}
-
 namespace cxx_wrap
 {
   template<> struct IsBits<SDPA::ConeType> : std::true_type {};
+  template<> struct IsBits<SDPA::PhaseType> : std::true_type {};
 }
 
 JULIA_CPP_MODULE_BEGIN(registry)
 
     cxx_wrap::Module& sdpa = registry.create_module("SDPA");
-    sdpa.method("greet", &greet);
 
     sdpa.add_bits<SDPA::ConeType>("ConeType");
     sdpa.set_const("SDP", SDPA::SDP);
     sdpa.set_const("SOCP", SDPA::SOCP);
     sdpa.set_const("LP", SDPA::LP);
+
+    sdpa.add_bits<SDPA::PhaseType>("PhaseType");
+    sdpa.set_const("noINFO", SDPA::noINFO);
+    sdpa.set_const("pFEAS", SDPA::pFEAS);
+    sdpa.set_const("dFEAS", SDPA::dFEAS);
+    sdpa.set_const("pdFEAS", SDPA::pdFEAS);
+    sdpa.set_const("pdINF", SDPA::pdINF);
+    sdpa.set_const("pFEAS_dINF", SDPA::pFEAS_dINF);
+    sdpa.set_const("pINF_dFEAS", SDPA::pINF_dFEAS);
+    sdpa.set_const("pdOPT", SDPA::pdOPT);
+    sdpa.set_const("pUNBD", SDPA::pUNBD);
+    sdpa.set_const("dUNBD", SDPA::dUNBD);
 
     sdpa.add_type<SDPA>("SDPAProblem")
         .method("inputConstraintNumber", &SDPA::inputConstraintNumber)
@@ -41,10 +48,12 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getDualObj", &SDPA::getDualObj)
         .method("getPrimalError", &SDPA::getPrimalError)
         .method("getDualError", &SDPA::getDualError)
+        .method("getPhaseValue", &SDPA::getPhaseValue)
         .method("getResultXMat", &SDPA::getResultXMat)
         .method("getResultXVec", &SDPA::getResultXVec)
         .method("getResultYMat", &SDPA::getResultYMat)
         .method("terminate", &SDPA::terminate);
+      //.method("writeInputSparse", &SDPA::writeInputSparse);
 
 
 JULIA_CPP_MODULE_END

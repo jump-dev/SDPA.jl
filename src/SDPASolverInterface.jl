@@ -48,6 +48,7 @@ function loadproblem!(m::SDPAMathProgModel, blkdims::Vector{Int}, constr::Int)
 end
 
 function setconstrB!(m::SDPAMathProgModel, val, constr::Integer)
+    @assert constr > 0
     inputCVec(m.problem, constr, val)
 end
 function setconstrentry!(m::SDPAMathProgModel, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
@@ -65,22 +66,27 @@ function optimize!(m::SDPAMathProgModel)
 end
 
 function status(m::SDPAMathProgModel)
-    return :Optimal
-    status = m.status
-    if status == 0
-        return :Optimal
-    elseif status == 1
-        return :Infeasible
-    elseif status == 2
-        return :Unbounded
-    elseif status == 3
-        return :Suboptimal
-    elseif status == 4
-        return :UserLimit
-    elseif 5 <= status <= 9
-        return :Error
-    elseif status == -1
+    status = getPhaseValue(m.problem)
+    if status == noINFO
         return :Uninitialized
+    elseif status == pFEAS
+        return :Suboptimal
+    elseif status == dFEAS
+        return :Suboptimal
+    elseif status == pdFEAS
+        return :Optimal
+    elseif status == pdINF
+        return :Infeasible
+    elseif status == pFEAS_dINF
+        return :Unbounded
+    elseif status == pINF_dFEAS
+        return :Infeasible
+    elseif status == pdOPT
+        return :Optimal
+    elseif status == pUNBD
+        return :Unbounded
+    elseif status == dUNBD
+        return :Infeasible
     else
         error("Internal library error: status=$status")
     end

@@ -2,11 +2,11 @@ abstract BlockSolution <: AbstractMatrix{Cdouble}
 type PrimalSolution <: BlockSolution
     problem::SDPAProblem
 end
-getptr(X::PrimalSolution, blk) = getResultXMat(X.problem, blk)
+getptr(X::PrimalSolution, blk) = getResultYMat(X.problem, blk)
 type VarDualSolution <: BlockSolution
     problem::SDPAProblem
 end
-getptr(X::VarDualSolution, blk) = getResultYMat(X.problem, blk)
+getptr(X::VarDualSolution, blk) = getResultXMat(X.problem, blk)
 function Base.size(X::BlockSolution)
     n = sum([getBlockSize(X.problem, blk) for blk in 1:getBlockNumber(X.problem)])
     (n, n)

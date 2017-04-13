@@ -5,8 +5,11 @@
 | [![Build Status][build-img]][build-url] |
 | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
 
+Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver.
+Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
+
 Currently, only Linux is supported. If you are using Ubuntu, please install the following dependencies:
-```
+```sh
 $ sudo apt-get install gfortran liblapack-dev libopenblas-dev
 ```
 

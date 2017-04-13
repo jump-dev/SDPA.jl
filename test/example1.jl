@@ -35,6 +35,4 @@ SDPA.solve(p)
 @test SDPA.getPrimalError(p) < 1e-10
 @test SDPA.getDualError(p) < 1e-10
 
-@show Matrix(SDPA.PrimalSolution(p))
-
 SDPA.terminate(p)
