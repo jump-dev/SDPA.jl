@@ -41,5 +41,4 @@ function Base.getindex(X::BlockSolution, i::Integer, j::Integer)
             j -= n
         end
     end
-    throw(BoundsError(X, (i, j)))
 end

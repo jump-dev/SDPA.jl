@@ -137,6 +137,8 @@ Y = SDPA.PrimalSolution(p)
 @test Y[1, 3] == 0
 @test_throws BoundsError Y[1, 0]
 @test_throws BoundsError Y[8, 2]
+@test_throws BoundsError Y[0]
+@test_throws BoundsError Y[4]
 @test_throws BoundsError Y[1][0, 1]
 @test_throws BoundsError Y[1][1, 3]
 @test isapprox(Y[1], [+2.640e+00 +5.606e-01;
