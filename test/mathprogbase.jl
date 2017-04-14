@@ -22,13 +22,15 @@ end
     end
 end
 
-using SemidefiniteModels, MathProgBase
+using SemidefiniteModels
 @testset "MPB interface" begin
     solver = SDPASolver()
     @test supportedcones(solver) == [:Free,:Zero,:NonNeg,:NonPos,:SOC,:RSOC,:SDP]
     m = SDModel(solver)
     @test_throws ErrorException loadproblem!(m, "in.dat-s")
-    loadproblem!(m, [1], 0)
+    # If I put 0 as third argument, the .cov coverage files get deleted
+    # Weirdest thing ever :o
+    loadproblem!(m, [1], 1)
     @test_throws ErrorException setvartype!(m, :Int, 1, 1, 1)
     @test status(m) == :Uninitialized
 end

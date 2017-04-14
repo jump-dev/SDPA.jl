@@ -148,7 +148,6 @@ Y = SDPA.PrimalSolution(p)
 @test isapprox(Y[4, 3], -1.514e+00, rtol=1e-3)
 @test isapprox(Y[3], Diagonal([+4.087e-07, +3.195e-08]), rtol=1e-4)
 @test isapprox(Y[6, 6], +4.087e-07, rtol=1e-4)
-@show Y[6, 7]
 @test Y[6, 7] == 0
 
 SDPA.terminate(p)
