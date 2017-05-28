@@ -14,6 +14,10 @@ addons:
     - libopenblas-dev
 notifications:
   email: false
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        brew install libtool gcc;
+    fi
 before_script:
   - julia -e 'Pkg.clone("https://github.com/JuliaInterop/CxxWrap.jl")'
 # uncomment the following lines to override the default test script

@@ -30,10 +30,12 @@ provides(BuildProcess,
             pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumpsMakefile`, stdout="mumps/Makefile")
             `rm mumpsMakefile`
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
-            pipeline(`sed 's/libsdpa.a/libsdpa.la\nlibsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
+            # To make \n works on Mac OS I need to do:
+            # https://stackoverflow.com/questions/24275070/sed-not-giving-me-correct-substitute-operation-for-newline-with-mac-difference
+            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
             `mv Makefile.am.1 Makefile.am`
-            pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\nAC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
+            pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\'$'\n''AC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
             # Short-circuit test because they do
             # #define dgemm_ innocuous_dgemm_
             # #include <limits.h>
