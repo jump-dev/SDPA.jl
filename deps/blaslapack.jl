@@ -13,8 +13,13 @@ function ldflags(; libpath=Libdl.dlpath(libname), libname=first(split(basename(l
     # I use [4:end] to drop the "lib" at the beginning
     linkname = libname[4:end]
     info("Using $libname at $libpath : -L$libdir -l$linkname")
-    # In Ubuntu, /usr/lib/lapack.so.3 is detected but we need to link to /usr/lib/lapack. To fix this, we add -L$libdir/$linkname
-    "-L$libdir -L$libdir/$linkname -l$linkname"
+    @static if is_apple()
+        # On Mac OS, -L$libdir/$linkname throws an error since it is not a directory
+        "-L$libdir -l$linkname"
+    else
+        # In Ubuntu, /usr/lib/lapack.so.3 is detected but we need to link to /usr/lib/lapack. To fix this, we add -L$libdir/$linkname
+        "-L$libdir -L$libdir/$linkname -l$linkname"
+    end
 end
 
 function blas_lib()

@@ -1,4 +1,4 @@
 julia 0.5
 BinDeps
-CxxWrap
+CxxWrap 0.4 0.5-
 SemidefiniteModels

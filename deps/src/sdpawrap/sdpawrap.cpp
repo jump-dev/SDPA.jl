@@ -1,7 +1,7 @@
-#include <cxx_wrap.hpp>
+#include "jlcxx/jlcxx.hpp"
 #include <sdpa_call.h>
 
-namespace cxx_wrap
+namespace jlcxx
 {
   template<> struct IsBits<SDPA::ConeType> : std::true_type {};
   template<> struct IsBits<SDPA::PhaseType> : std::true_type {};
@@ -9,7 +9,7 @@ namespace cxx_wrap
 
 JULIA_CPP_MODULE_BEGIN(registry)
 
-    cxx_wrap::Module& sdpa = registry.create_module("SDPA");
+    jlcxx::Module& sdpa = registry.create_module("SDPA");
 
     sdpa.add_bits<SDPA::ConeType>("ConeType");
     sdpa.set_const("SDP", SDPA::SDP);

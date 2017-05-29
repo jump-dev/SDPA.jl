@@ -15,8 +15,8 @@ if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=pentium4")
 endif()
 
-# CxxWrap_DIR is set by build.jl
-find_package(CxxWrap)
+# JlCxx_DIR is set by build.jl
+find_package(JlCxx)
 
 # SDPA_DIR is set by build.jl
 include_directories(${SDPA_DIR})
@@ -24,10 +24,10 @@ include_directories(${MUMPS_INCLUDE_DIR})
 
 add_library(sdpawrap SHARED sdpawrap.cpp)
 # ${PORD_LIB}: PORD_LIB does not seem usefull
-target_link_libraries(sdpawrap CxxWrap::cxx_wrap ${SDPA_LIBRARY} -L${MUMPS_LIB_DIR} -ldmumps -lmumps_common -lpord -L${MUMPS_LIBSEQ_DIR} -lmpiseq -lgfortran -lm -lquadmath -lpthread ${BLAS_LIB} ${LAPACK_LIB})
+target_link_libraries(sdpawrap JlCxx::jlcxx ${SDPA_LIBRARY} -L${MUMPS_LIB_DIR} -ldmumps -lmumps_common -lpord -L${MUMPS_LIBSEQ_DIR} -lmpiseq -lm -lpthread ${BLAS_LIB} ${LAPACK_LIB})
 
-get_property(JULIA_LIBRARY TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_LINK_LIBRARIES)
-get_property(JULIA_INCLUDES TARGET CxxWrap::cxx_wrap PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+get_property(JULIA_LIBRARY TARGET JlCxx::jlcxx PROPERTY INTERFACE_LINK_LIBRARIES)
+get_property(JULIA_INCLUDES TARGET JlCxx::jlcxx PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 
 install(TARGETS
     sdpawrap

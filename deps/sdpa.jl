@@ -9,6 +9,11 @@ sdpasrcdir = joinpath(BinDeps.srcdir(sdpa), sdpaname)
 sdpaprefixdir = joinpath(BinDeps.usrdir(sdpa))
 sdpalibdir = joinpath(sdpaprefixdir, "lib")
 target="libsdpa.$(Libdl.dlext)"
+@static if is_apple()
+    target0="libsdpa.0.$(Libdl.dlext)"
+else
+    target0="libsdpa.$(Libdl.dlext).0"
+end
 sdpa_library = joinpath(sdpalibdir, target)
 mumps_dir = joinpath(sdpasrcdir, "mumps", "build")
 mumps_lib_dir = joinpath(mumps_dir, "lib")
@@ -26,7 +31,8 @@ provides(BuildProcess,
         ChangeDirectory(sdpasrcdir)
         FileRule(joinpath(sdpa_library), @build_steps begin
             # See https://sourceforge.net/p/sdpa/discussion/1393613/thread/1a6d8897/
-            pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile")
+            #pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile") # cut on mac does not support --complement
+            `mv mumps/Makefile mumpsMakefile`
             pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumpsMakefile`, stdout="mumps/Makefile")
             `rm mumpsMakefile`
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
@@ -49,7 +55,7 @@ provides(BuildProcess,
             `autoreconf -i`
             `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FCFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
-            `cp .libs/$target .libs/$target.0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
+            `cp .libs/$target .libs/$target0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
         end)
     end
 end), sdpa)
