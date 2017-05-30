@@ -38,7 +38,7 @@ provides(BuildProcess,
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
             # To make \n works on Mac OS I need to do:
             # https://stackoverflow.com/questions/24275070/sed-not-giving-me-correct-substitute-operation-for-newline-with-mac-difference
-            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
+            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared\'$'\n''libsdpa_la_LIBADD = \$(MUMPS_LIBS) \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(PTHREAD_LIBS) \$(FCLIBS)/' Makefile.am.1`, stdout="Makefile.am")
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
             `mv Makefile.am.1 Makefile.am`
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\'$'\n''AC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
