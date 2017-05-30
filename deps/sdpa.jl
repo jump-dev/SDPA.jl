@@ -38,7 +38,7 @@ provides(BuildProcess,
             pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
             # To make \n works on Mac OS I need to do:
             # https://stackoverflow.com/questions/24275070/sed-not-giving-me-correct-substitute-operation-for-newline-with-mac-difference
-            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared/' Makefile.am.1`, stdout="Makefile.am")
+            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared\'$'\n''libsdpa_la_LIBADD = \$(MUMPS_LIBS) \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(PTHREAD_LIBS) \$(FCLIBS)/' Makefile.am.1`, stdout="Makefile.am")
             pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
             `mv Makefile.am.1 Makefile.am`
             pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\'$'\n''AC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
@@ -56,6 +56,10 @@ provides(BuildProcess,
             `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FCFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
             `cp .libs/$target .libs/$target0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
+            @static if is_apple()
+                # Change it from /usr/local/lib/libsdpa.0.dylib to @rpath/libsdpa.0/dylib
+                `install_name_tool -id @rpath/$target0 $sdpalibdir/$target`
+            end
         end)
     end
 end), sdpa)
