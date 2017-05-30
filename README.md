@@ -13,7 +13,7 @@ Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl)
 You can install SDPA.jl as follows:
 ```julia
 julia> Pkg.add("https://github.com/blegat/SDPA.jl.git")
-julia> Pkg.build("https://github.com/blegat/SDPA.jl.git")
+julia> Pkg.build("SDPA")
 ```
 
 The `Pkg.build` command will compile SDPA from source, you will need to install the following dependencies for the compilation to work.
