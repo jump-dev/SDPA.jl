@@ -32,16 +32,9 @@ provides(BuildProcess,
         FileRule(joinpath(sdpa_library), @build_steps begin
             # See https://sourceforge.net/p/sdpa/discussion/1393613/thread/1a6d8897/
             #pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile") # cut on mac does not support --complement
-            `mv mumps/Makefile mumpsMakefile`
-            pipeline(`sed "s/OPTF = \"/OPTF = \" '-I\$\$(topdir)\/libseq'/" mumpsMakefile`, stdout="mumps/Makefile")
-            `rm mumpsMakefile`
-            pipeline(`sed 's/_a_/_la_/' Makefile.am`, stdout="Makefile.am.1")
-            # To make \n works on Mac OS I need to do:
-            # https://stackoverflow.com/questions/24275070/sed-not-giving-me-correct-substitute-operation-for-newline-with-mac-difference
-            pipeline(`sed 's/libsdpa.a/libsdpa.la\'$'\n''libsdpa_la_LDFLAGS = -shared\'$'\n''libsdpa_la_LIBADD = \$(MUMPS_LIBS) \$(LAPACK_LIBS) \$(BLAS_LIBS) \$(PTHREAD_LIBS) \$(FCLIBS)/' Makefile.am.1`, stdout="Makefile.am")
-            pipeline(`sed 's/lib_LIB/lib_LTLIB/' Makefile.am`, stdout="Makefile.am.1")
-            `mv Makefile.am.1 Makefile.am`
-            pipeline(`sed 's/AC_FC_LIBRARY/LT_INIT\'$'\n''AC_FC_LIBRARY/' configure.in`, stdout="configure.ac")
+            pipeline(`patch -p1`, stdin="../../mumps.diff")
+            pipeline(`patch -p1`, stdin="../../shared.diff")
+            pipeline(`patch -p1`, stdin="../../lt_init.diff")
             # Short-circuit test because they do
             # #define dgemm_ innocuous_dgemm_
             # #include <limits.h>
@@ -51,7 +44,7 @@ provides(BuildProcess,
             # This makes it impossible for us to pass it since we redefine dgemm_ as dgemm_64_
             pipeline(`sed 's/HAVE_BLAS=""/HAVE_BLAS="yes"/' configure.ac`, stdout="configure.ac.1")
             pipeline(`sed 's/HAVE_LAPACK=""/HAVE_LAPACK="yes"/' configure.ac.1`, stdout="configure.ac")
-            `rm configure.in configure.ac.1`
+            `rm configure.ac.1`
             `autoreconf -i`
             `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FCFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
