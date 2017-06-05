@@ -34,6 +34,8 @@ provides(BuildProcess,
             #pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile") # cut on mac does not support --complement
             pipeline(`patch -p1`, stdin="../../mumps.diff")
             pipeline(`patch -p1`, stdin="../../shared.diff")
+            # Old version of patch (such as the one used in Mac OS) does not support renaming so we use mv outside of the patch instead
+            `mv configure.in configure.ac`
             pipeline(`patch -p1`, stdin="../../lt_init.diff")
             # Short-circuit test because they do
             # #define dgemm_ innocuous_dgemm_
