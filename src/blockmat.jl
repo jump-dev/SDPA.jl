@@ -1,9 +1,9 @@
-abstract BlockSolution <: AbstractMatrix{Cdouble}
-type PrimalSolution <: BlockSolution
+abstract type BlockSolution <: AbstractMatrix{Cdouble} end
+struct PrimalSolution <: BlockSolution
     problem::SDPAProblem
 end
 getptr(X::PrimalSolution, blk) = getResultYMat(X.problem, blk)
-type VarDualSolution <: BlockSolution
+struct VarDualSolution <: BlockSolution
     problem::SDPAProblem
 end
 getptr(X::VarDualSolution, blk) = getResultXMat(X.problem, blk)
