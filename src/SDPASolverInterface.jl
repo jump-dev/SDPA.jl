@@ -3,12 +3,12 @@ importall SemidefiniteModels
 
 export SDPAMathProgModel, SDPASolver
 
-immutable SDPASolver <: AbstractMathProgSolver
+struct SDPASolver <: AbstractMathProgSolver
     options::Dict{Symbol,Any}
 end
 SDPASolver(;kwargs...) = SDPASolver(Dict{Symbol,Any}(kwargs))
 
-type SDPAMathProgModel <: AbstractSDModel
+mutable struct SDPAMathProgModel <: AbstractSDModel
     problem::SDPAProblem
     options::Dict{Symbol,Any}
     function SDPAMathProgModel(; kwargs...)

@@ -5,7 +5,7 @@ os:
   - linux
   - osx
 julia:
-  - release
+  - 0.6
   - nightly
 addons:
   apt_packages:
@@ -26,4 +26,4 @@ before_script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("SDPA"); Pkg.test("SDPA"; coverage=true)'
 after_success:
   # push coverage results to Coveralls and Codecov
-  - julia -e 'cd(Pkg.dir("SDPA")); run(`ls -R`); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
+  - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
