@@ -10,7 +10,7 @@ end
     end
 
     @testset "Conic SOC tests" begin
-        conicSOCtest(SDPASolver(write_prob="soc.prob"), duals=true, tol=1e-5)
+        conicSOCtest(SDPASolver(), duals=true, tol=1e-5)
     end
 
     @testset "Conic SOC rotated tests" begin

@@ -5,6 +5,7 @@ namespace jlcxx
 {
   template<> struct IsBits<SDPA::ConeType> : std::true_type {};
   template<> struct IsBits<SDPA::PhaseType> : std::true_type {};
+  template<> struct IsBits<SDPA::ParameterType> : std::true_type {};
 }
 
 JULIA_CPP_MODULE_BEGIN(registry)
@@ -27,6 +28,11 @@ JULIA_CPP_MODULE_BEGIN(registry)
     sdpa.set_const("pdOPT", SDPA::pdOPT);
     sdpa.set_const("pUNBD", SDPA::pUNBD);
     sdpa.set_const("dUNBD", SDPA::dUNBD);
+
+    sdpa.add_bits<SDPA::ParameterType>("ParameterType");
+    sdpa.set_const("PARAMETER_DEFAULT", SDPA::PARAMETER_DEFAULT);
+    sdpa.set_const("PARAMETER_UNSTABLE_BUT_FAST", SDPA::PARAMETER_UNSTABLE_BUT_FAST);
+    sdpa.set_const("PARAMETER_STABLE_BUT_SLOW", SDPA::PARAMETER_STABLE_BUT_SLOW);
 
     sdpa.add_type<SDPA>("SDPAProblem")
         .method("inputConstraintNumber", &SDPA::inputConstraintNumber)
@@ -52,7 +58,19 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("getResultXMat", &SDPA::getResultXMat)
         .method("getResultXVec", &SDPA::getResultXVec)
         .method("getResultYMat", &SDPA::getResultYMat)
-        .method("terminate", &SDPA::terminate);
+        .method("terminate", &SDPA::terminate)
+        .method("setParameterType", &SDPA::setParameterType)
+        .method("setParameterMaxIteration", &SDPA::setParameterMaxIteration)
+        .method("setParameterEpsilonStar", &SDPA::setParameterEpsilonStar)
+        .method("setParameterLambdaStar", &SDPA::setParameterLambdaStar)
+        .method("setParameterOmegaStar", &SDPA::setParameterOmegaStar)
+        .method("setParameterLowerBound", &SDPA::setParameterLowerBound)
+        .method("setParameterUpperBound", &SDPA::setParameterUpperBound)
+        .method("setParameterBetaStar", &SDPA::setParameterBetaStar)
+        .method("setParameterBetaBar", &SDPA::setParameterBetaBar)
+        .method("setParameterGammaStar", &SDPA::setParameterGammaStar)
+        .method("setParameterEpsilonDash", &SDPA::setParameterEpsilonDash);
+
       //.method("writeInputSparse", &SDPA::writeInputSparse);
 
 
