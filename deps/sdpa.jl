@@ -33,6 +33,7 @@ provides(BuildProcess,
             # See https://sourceforge.net/p/sdpa/discussion/1393613/thread/1a6d8897/
             #pipeline(`sed "s/cut -f2 -d=/cut --complement -f1 -d=/" mumps/Makefile`, stdout="mumpsMakefile") # cut on mac does not support --complement
             pipeline(`patch -p1`, stdin="../../mumps.diff")
+            pipeline(`patch -p1`, stdin="../../apply_quiet.diff")
             pipeline(`patch -p1`, stdin="../../shared.diff")
             # Old version of patch (such as the one used in Mac OS) does not support renaming so we use mv outside of the patch instead
             `mv configure.in configure.ac`
