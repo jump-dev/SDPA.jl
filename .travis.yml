@@ -12,6 +12,9 @@ addons:
     - gfortran
     - liblapack-dev
     - libopenblas-dev
+matrix:
+  allow_failures:
+    - julia: nightly
 notifications:
   email: false
 before_install:
