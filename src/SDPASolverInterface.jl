@@ -84,7 +84,7 @@ function MOI.optimize!(m::SDPASolverInstance)
     SDPA.solve(m.problem)
 end
 
-function MOI.getattribute(m::SDPASolverInstance, ::MOI.TerminationStatus)
+function MOI.get(m::SDPASolverInstance, ::MOI.TerminationStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.OtherError
@@ -109,10 +109,10 @@ function MOI.getattribute(m::SDPASolverInstance, ::MOI.TerminationStatus)
     end
 end
 
-function MOI.cangetattribute(m::SDPASolverInstance, ::MOI.PrimalStatus)
+function MOI.canget(m::SDPASolverInstance, ::MOI.PrimalStatus)
     !(getPhaseValue(m.problem) in [noINFO, pINF_dFEAS, dUNBD, pdINF])
 end
-function MOI.getattribute(m::SDPASolverInstance, ::MOI.PrimalStatus)
+function MOI.get(m::SDPASolverInstance, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UnknownResultStatus
@@ -137,10 +137,10 @@ function MOI.getattribute(m::SDPASolverInstance, ::MOI.PrimalStatus)
     end
 end
 
-function MOI.cangetattribute(m::SDPASolverInstance, ::MOI.DualStatus)
+function MOI.canget(m::SDPASolverInstance, ::MOI.DualStatus)
     !(getPhaseValue(m.problem) in [noINFO, pFEAS_dINF, pUNBD])
 end
-function MOI.getattribute(m::SDPASolverInstance, ::MOI.DualStatus)
+function MOI.get(m::SDPASolverInstance, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UnknownResultStatus
