@@ -16,6 +16,7 @@ notifications:
   email: false
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        brew update; # Fix "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
         brew install libtool gcc;
     fi
 before_script:
