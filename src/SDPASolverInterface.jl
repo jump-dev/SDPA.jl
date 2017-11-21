@@ -1,26 +1,21 @@
 using SemidefiniteOptInterface
-SOI = SemidefiniteOptInterface
+SDOI = SemidefiniteOptInterface
 
 export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 
 using MathOptInterface
 MOI = MathOptInterface
 
-export SDPASolver
+export SDPAInstance
 
-struct SDPASolver <: SOI.AbstractSDSolver
-    options::Dict{Symbol,Any}
-end
-SDPASolver(;kwargs...) = SDPASolver(Dict{Symbol,Any}(kwargs))
-
-mutable struct SDPASolverInstance <: SOI.AbstractSDSolverInstance
+mutable struct SDPASolverInstance <: SDOI.AbstractSDSolverInstance
     problem::SDPAProblem
     options::Dict{Symbol,Any}
     function SDPASolverInstance(; kwargs...)
         new(SDPAProblem(), Dict{Symbol, Any}(kwargs))
     end
 end
-SOI.SDSolverInstance(s::SDPASolver) = SDPASolverInstance(; s.options...)
+SDPAInstance(; kws...) = SDOI.SDOIInstance(SDPASolverInstance(; kws...))
 
 const setparam = Dict(:Mode         =>setParameterType,
                       :MaxIteration =>setParameterMaxIteration,
@@ -40,7 +35,7 @@ function setparameters!(problem, options)
     end
 end
 
-function SOI.initinstance!(m::SDPASolverInstance, blkdims::Vector{Int}, nconstrs::Int)
+function SDOI.initinstance!(m::SDPASolverInstance, blkdims::Vector{Int}, nconstrs::Int)
     @assert nconstrs >= 0
     dummy = nconstrs == 0
     if dummy
@@ -58,22 +53,22 @@ function SOI.initinstance!(m::SDPASolverInstance, blkdims::Vector{Int}, nconstrs
     end
     initializeUpperTriangleSpace(m.problem)
     if dummy
-        SOI.setconstraintconstant!(m, 1., 1)
-        SOI.setconstraintcoefficient!(m, 1., 1, length(blkdims), 1, 1)
+        SDOI.setconstraintconstant!(m, 1., 1)
+        SDOI.setconstraintcoefficient!(m, 1., 1, length(blkdims), 1, 1)
     end
 end
 
-function SOI.setconstraintconstant!(m::SDPASolverInstance, val, constr::Integer)
+function SDOI.setconstraintconstant!(m::SDPASolverInstance, val, constr::Integer)
     @assert constr > 0
     #println("b[$constr] = $val")
     inputCVec(m.problem, constr, val)
 end
-function SOI.setconstraintcoefficient!(m::SDPASolverInstance, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
+function SDOI.setconstraintcoefficient!(m::SDPASolverInstance, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
     @assert constr > 0
     #println("A[$constr][$blk][$i, $j] = $coef")
     inputElement(m.problem, constr, blk, i, j, float(coef), false)
 end
-function SOI.setobjectivecoefficient!(m::SDPASolverInstance, coef, blk::Integer, i::Integer, j::Integer)
+function SDOI.setobjectivecoefficient!(m::SDPASolverInstance, coef, blk::Integer, i::Integer, j::Integer)
     #println("C[$blk][$i, $j] = $coef")
     inputElement(m.problem, 0, blk, i, j, float(coef), false)
 end
@@ -165,10 +160,10 @@ function MOI.get(m::SDPASolverInstance, ::MOI.DualStatus)
     end
 end
 
-SOI.getprimalobjectivevalue(m::SDPASolverInstance) = getPrimalObj(m.problem)
-SOI.getdualobjectivevalue(m::SDPASolverInstance) = getDualObj(m.problem)
-SOI.getX(m::SDPASolverInstance) = PrimalSolution(m.problem)
-function SOI.gety(m::SDPASolverInstance)
+SDOI.getprimalobjectivevalue(m::SDPASolverInstance) = getPrimalObj(m.problem)
+SDOI.getdualobjectivevalue(m::SDPASolverInstance) = getDualObj(m.problem)
+SDOI.getX(m::SDPASolverInstance) = PrimalSolution(m.problem)
+function SDOI.gety(m::SDPASolverInstance)
     unsafe_wrap(Array, getResultXVec(m.problem), getConstraintNumber(m.problem))
 end
-SOI.getZ(m::SDPASolverInstance) = VarDualSolution(m.problem)
+SDOI.getZ(m::SDPASolverInstance) = VarDualSolution(m.problem)

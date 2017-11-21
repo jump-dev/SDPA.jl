@@ -4,11 +4,15 @@ using Base.Test
 include("example1.jl")
 include("example2.jl")
 
+using MathOptInterfaceTests
+const MOIT = MathOptInterfaceTests
+
+const solver = () -> SDPA.SDPAInstance()
+const config = MOIT.TestConfig(1e-5, 1e-5, true, true, true)
+
 @testset "Linear tests" begin
-    include(joinpath(Pkg.dir("MathOptInterface"), "test", "contlinear.jl"))
-    contlineartest(SDPA.SDPASolver(); atol=1e-5, rtol=1e-5)
+    MOIT.contlineartest(solver, config)
 end
 @testset "Conic tests" begin
-    include(joinpath(Pkg.dir("MathOptInterface"), "test", "contconic.jl"))
-    contconictest(SDPA.SDPASolver(); atol=1e-5, rtol=1e-5)
+    MOIT.contconictest(solver, config)
 end
