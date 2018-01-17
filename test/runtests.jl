@@ -8,11 +8,11 @@ using MathOptInterfaceTests
 const MOIT = MathOptInterfaceTests
 
 const solver = () -> SDPA.SDPAInstance()
-const config = MOIT.TestConfig(1e-5, 1e-5, true, true, true)
+const config = MOIT.TestConfig(atol=1e-5, rtol=1e-5)
 
 @testset "Linear tests" begin
     MOIT.contlineartest(solver, config)
 end
 @testset "Conic tests" begin
-    MOIT.contconictest(solver, config)
+    MOIT.contconictest(solver, config, ["logdet", "exp"])
 end
