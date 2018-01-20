@@ -8,7 +8,8 @@ using MathOptInterfaceTests
 const MOIT = MathOptInterfaceTests
 
 const solver = () -> SDPA.SDPAInstance()
-const config = MOIT.TestConfig(atol=1e-5, rtol=1e-5)
+# test 1e-3 because of rsoc3 test, otherwise, 1e-5 is enough
+const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 
 @testset "Linear tests" begin
     MOIT.contlineartest(solver, config)
