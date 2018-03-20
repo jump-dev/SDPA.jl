@@ -20,6 +20,7 @@ notifications:
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
         brew update; # Fix "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
+        brew cask uninstall oclint; # See https://github.com/travis-ci/travis-ci/issues/8826
         brew install libtool gcc;
     fi
 before_script:
