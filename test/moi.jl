@@ -14,7 +14,7 @@ MOIB.@bridge RSOCtoPSDC MOIB.RSOCtoPSDCBridge () () (RotatedSecondOrderCone,) ()
 MOIB.@bridge GeoMean MOIB.GeoMeanBridge () () (GeometricMeanCone,) () () () (VectorOfVariables,) (VectorAffineFunction,)
 MOIB.@bridge RootDet MOIB.RootDetBridge () () (RootDetConeTriangle,) () () () (VectorOfVariables,) (VectorAffineFunction,)
 
-const optimizer = SDPA.SDPAOptimizer(printlevel=0)
+const optimizer = SDPA.SDPAOptimizer()
 # test 1e-3 because of rsoc3 test, otherwise, 1e-5 is enough
 const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 

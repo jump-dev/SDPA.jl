@@ -6,16 +6,16 @@ export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 using MathOptInterface
 MOI = MathOptInterface
 
-export SDPAInstance
+export SDPAOptimizer
 
-mutable struct SDPASolverInstance <: SDOI.AbstractSDSolverInstance
+mutable struct SDPASDOptimizer <: SDOI.AbstractSDOptimizer
     problem::SDPAProblem
     options::Dict{Symbol,Any}
-    function SDPASolverInstance(; kwargs...)
+    function SDPASDOptimizer(; kwargs...)
         new(SDPAProblem(), Dict{Symbol, Any}(kwargs))
     end
 end
-SDPAInstance(; kws...) = SDOI.SDOIInstance(SDPASolverInstance(; kws...))
+SDPAOptimizer(; kws...) = SDOI.SDOIOptimizer(SDPASDOptimizer(; kws...))
 
 const setparam = Dict(:Mode         =>setParameterType,
                       :MaxIteration =>setParameterMaxIteration,
@@ -35,7 +35,7 @@ function setparameters!(problem, options)
     end
 end
 
-function SDOI.initinstance!(m::SDPASolverInstance, blkdims::Vector{Int}, nconstrs::Int)
+function SDOI.init!(m::SDPASDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     @assert nconstrs >= 0
     dummy = nconstrs == 0
     if dummy
@@ -58,28 +58,28 @@ function SDOI.initinstance!(m::SDPASolverInstance, blkdims::Vector{Int}, nconstr
     end
 end
 
-function SDOI.setconstraintconstant!(m::SDPASolverInstance, val, constr::Integer)
+function SDOI.setconstraintconstant!(m::SDPASDOptimizer, val, constr::Integer)
     @assert constr > 0
     #println("b[$constr] = $val")
     inputCVec(m.problem, constr, val)
 end
-function SDOI.setconstraintcoefficient!(m::SDPASolverInstance, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
+function SDOI.setconstraintcoefficient!(m::SDPASDOptimizer, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
     @assert constr > 0
     #println("A[$constr][$blk][$i, $j] = $coef")
     inputElement(m.problem, constr, blk, i, j, float(coef), false)
 end
-function SDOI.setobjectivecoefficient!(m::SDPASolverInstance, coef, blk::Integer, i::Integer, j::Integer)
+function SDOI.setobjectivecoefficient!(m::SDPASDOptimizer, coef, blk::Integer, i::Integer, j::Integer)
     #println("C[$blk][$i, $j] = $coef")
     inputElement(m.problem, 0, blk, i, j, float(coef), false)
 end
 
-function MOI.optimize!(m::SDPASolverInstance)
+function MOI.optimize!(m::SDPASDOptimizer)
     SDPA.initializeUpperTriangle(m.problem, false)
     SDPA.initializeSolve(m.problem)
     SDPA.solve(m.problem)
 end
 
-function MOI.get(m::SDPASolverInstance, ::MOI.TerminationStatus)
+function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.OtherError
@@ -104,10 +104,10 @@ function MOI.get(m::SDPASolverInstance, ::MOI.TerminationStatus)
     end
 end
 
-function MOI.canget(m::SDPASolverInstance, ::MOI.PrimalStatus)
+function MOI.canget(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     !(getPhaseValue(m.problem) in [noINFO, pINF_dFEAS, dUNBD, pdINF])
 end
-function MOI.get(m::SDPASolverInstance, ::MOI.PrimalStatus)
+function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UnknownResultStatus
@@ -132,10 +132,10 @@ function MOI.get(m::SDPASolverInstance, ::MOI.PrimalStatus)
     end
 end
 
-function MOI.canget(m::SDPASolverInstance, ::MOI.DualStatus)
+function MOI.canget(m::SDPASDOptimizer, ::MOI.DualStatus)
     !(getPhaseValue(m.problem) in [noINFO, pFEAS_dINF, pUNBD])
 end
-function MOI.get(m::SDPASolverInstance, ::MOI.DualStatus)
+function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UnknownResultStatus
@@ -160,10 +160,10 @@ function MOI.get(m::SDPASolverInstance, ::MOI.DualStatus)
     end
 end
 
-SDOI.getprimalobjectivevalue(m::SDPASolverInstance) = getPrimalObj(m.problem)
-SDOI.getdualobjectivevalue(m::SDPASolverInstance) = getDualObj(m.problem)
-SDOI.getX(m::SDPASolverInstance) = PrimalSolution(m.problem)
-function SDOI.gety(m::SDPASolverInstance)
+SDOI.getprimalobjectivevalue(m::SDPASDOptimizer) = getPrimalObj(m.problem)
+SDOI.getdualobjectivevalue(m::SDPASDOptimizer) = getDualObj(m.problem)
+SDOI.getX(m::SDPASDOptimizer) = PrimalSolution(m.problem)
+function SDOI.gety(m::SDPASDOptimizer)
     unsafe_wrap(Array, getResultXVec(m.problem), getConstraintNumber(m.problem))
 end
-SDOI.getZ(m::SDPASolverInstance) = VarDualSolution(m.problem)
+SDOI.getZ(m::SDPASDOptimizer) = VarDualSolution(m.problem)
