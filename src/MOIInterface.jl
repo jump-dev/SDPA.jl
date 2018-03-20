@@ -17,24 +17,6 @@ mutable struct SDPASDOptimizer <: SDOI.AbstractSDOptimizer
 end
 SDPAOptimizer(; kws...) = SDOI.SDOIOptimizer(SDPASDOptimizer(; kws...))
 
-const setparam = Dict(:Mode         =>setParameterType,
-                      :MaxIteration =>setParameterMaxIteration,
-                      :EpsilonStar  =>setParameterEpsilonStar,
-                      :LambdaStar   =>setParameterLambdaStar,
-                      :OmegaStar    =>setParameterOmegaStar,
-                      :LowerBound   =>setParameterLowerBound,
-                      :UpperBound   =>setParameterUpperBound,
-                      :BetaStar     =>setParameterBetaStar,
-                      :BetaBar      =>setParameterBetaBar,
-                      :GammaStar    =>setParameterGammaStar,
-                      :EpsilonDash  =>setParameterEpsilonDash)
-
-function setparameters!(problem, options)
-    for (optname, optval) in options
-        setparam[optname](problem, optval)
-    end
-end
-
 function SDOI.init!(m::SDPASDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     @assert nconstrs >= 0
     dummy = nconstrs == 0

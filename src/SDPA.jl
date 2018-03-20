@@ -14,6 +14,8 @@ end
 wrap_module(_l_sdpa_wrap, SDPA)
 
 include("blockmat.jl")
+include("options.jl")
 include("MOIInterface.jl")
+include("MPBInterface.jl")
 
 end # module
