@@ -3,4 +3,6 @@ using Base.Test
 
 include("example1.jl")
 include("example2.jl")
-include("mathprogbase.jl")
+
+include("moi.jl")
+include("mpb.jl")

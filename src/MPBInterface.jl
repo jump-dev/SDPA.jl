@@ -21,24 +21,6 @@ SDModel(s::SDPASolver) = SDPAMathProgModel(; s.options...)
 ConicModel(s::SDPASolver) = SDtoConicBridge(SDModel(s))
 LinearQuadraticModel(s::SDPASolver) = ConicToLPQPBridge(ConicModel(s))
 
-const setparam = Dict(:Mode         =>setParameterType,
-                      :MaxIteration =>setParameterMaxIteration,
-                      :EpsilonStar  =>setParameterEpsilonStar,
-                      :LambdaStar   =>setParameterLambdaStar,
-                      :OmegaStar    =>setParameterOmegaStar,
-                      :LowerBound   =>setParameterLowerBound,
-                      :UpperBound   =>setParameterUpperBound,
-                      :BetaStar     =>setParameterBetaStar,
-                      :BetaBar      =>setParameterBetaBar,
-                      :GammaStar    =>setParameterGammaStar,
-                      :EpsilonDash  =>setParameterEpsilonDash)
-
-function setparameters!(problem, options)
-    for (optname, optval) in options
-        setparam[optname](problem, optval)
-    end
-end
-
 supportedcones(s::SDPASolver) = [:Free,:Zero,:NonNeg,:NonPos,:SOC,:RSOC,:SDP]
 function setvartype!(m::SDPAMathProgModel, vtype, blk, i, j)
     if vtype != :Cont
