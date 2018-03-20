@@ -1,4 +1,7 @@
 julia 0.5
 BinDeps
 CxxWrap 0.5 0.6-
+MathOptInterface
+SemidefiniteOptInterface
+MathProgBase
 SemidefiniteModels
