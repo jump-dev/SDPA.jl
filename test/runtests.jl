@@ -4,5 +4,5 @@ using Base.Test
 include("example1.jl")
 include("example2.jl")
 
-include("moi.jl")
-include("mpb.jl")
+include("MOIWrapper.jl")
+include("MPBWrapper.jl")
