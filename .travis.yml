@@ -24,7 +24,6 @@ before_install:
 before_script:
   - julia -e 'Pkg.add("MathOptInterface")'
   - julia -e 'Pkg.checkout("MathOptInterface")'
-  - julia -e 'Pkg.clone("https://github.com/JuliaOpt/MathOptInterfaceBridges.jl.git")'
   - julia -e 'Pkg.clone("https://github.com/JuliaOpt/SemidefiniteOptInterface.jl.git")'
 after_success:
   # push coverage results to Coveralls and Codecov
