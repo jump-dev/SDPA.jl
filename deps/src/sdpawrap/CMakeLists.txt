@@ -23,10 +23,10 @@ include_directories(${MUMPS_INCLUDE_DIR})
 
 add_library(sdpawrap SHARED sdpawrap.cpp)
 # ${PORD_LIB}: PORD_LIB does not seem usefull
-target_link_libraries(sdpawrap JlCxx::jlcxx ${SDPA_LIBRARY})
+target_link_libraries(sdpawrap JlCxx::cxxwrap_julia ${SDPA_LIBRARY})
 
-get_property(JULIA_LIBRARY TARGET JlCxx::jlcxx PROPERTY INTERFACE_LINK_LIBRARIES)
-get_property(JULIA_INCLUDES TARGET JlCxx::jlcxx PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+get_property(JULIA_LIBRARY TARGET JlCxx::cxxwrap_julia PROPERTY INTERFACE_LINK_LIBRARIES)
+get_property(JULIA_INCLUDES TARGET JlCxx::cxxwrap_julia PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 
 install(TARGETS
     sdpawrap
