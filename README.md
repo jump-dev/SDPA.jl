@@ -1,9 +1,9 @@
 # SDPA
 
-| **Build Status** |
-|:----------------:|
-| [![Build Status][build-img]][build-url] |
-| [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
+| **PackageEvaluator** | **Build Status** | **References to cite** |
+|:--------------------:|:----------------:|:----------------------:|
+| [![][pkg-0.6-img]][pkg-0.6-url] | [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
+| [![][pkg-0.7-img]][pkg-0.7-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
 Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver.
 Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
@@ -68,9 +68,17 @@ $ brew install libtool gcc cmake wget autoconf automake # gfortran comes with th
 ### Windows
 Windows support is still a work in progress.
 
+[pkg-0.6-img]: http://pkg.julialang.org/badges/SDPA_0.6.svg
+[pkg-0.6-url]: http://pkg.julialang.org/?pkg=SDPA
+[pkg-0.7-img]: http://pkg.julialang.org/badges/SDPA_0.7.svg
+[pkg-0.7-url]: http://pkg.julialang.org/?pkg=SDPA
+
 [build-img]: https://travis-ci.org/blegat/SDPA.jl.svg?branch=master
 [build-url]: https://travis-ci.org/blegat/SDPA.jl
 [coveralls-img]: https://coveralls.io/repos/blegat/SDPA.jl/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/blegat/SDPA.jl?branch=master
 [codecov-img]: http://codecov.io/github/blegat/SDPA.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/blegat/SDPA.jl?branch=master
+
+[zenodo-url]: https://doi.org/10.5281/zenodo.1285668
+[zenodo-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.1285668.svg
