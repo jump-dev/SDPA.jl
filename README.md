@@ -41,7 +41,7 @@ The following table gives the default value for each parameter.
 
 You can install SDPA.jl as follows:
 ```julia
-julia> Pkg.add("https://github.com/blegat/SDPA.jl.git")
+julia> Pkg.clone("https://github.com/blegat/SDPA.jl.git")
 julia> Pkg.build("SDPA")
 ```
 
