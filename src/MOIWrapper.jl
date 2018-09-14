@@ -86,9 +86,6 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
     end
 end
 
-function MOI.canget(m::SDPASDOptimizer, ::MOI.PrimalStatus)
-    !(getPhaseValue(m.problem) in [noINFO, pINF_dFEAS, dUNBD, pdINF])
-end
 function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
@@ -114,9 +111,6 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     end
 end
 
-function MOI.canget(m::SDPASDOptimizer, ::MOI.DualStatus)
-    !(getPhaseValue(m.problem) in [noINFO, pFEAS_dINF, pUNBD])
-end
 function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO

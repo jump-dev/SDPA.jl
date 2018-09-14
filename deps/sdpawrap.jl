@@ -1,20 +1,19 @@
 sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"], depends=[depends; sdpa])
 
-#jlcxx_dir = joinpath(dirname(@__FILE__), "..", "..", "CxxWrap", "deps", "usr", "share", "cmake")
-jlcxx_dir = joinpath(dirname(CxxWrap._l_jlcxx), "cmake")
+jlcxx_dir = joinpath(CxxWrap.prefix().path, "cmake")
 
 prefix=joinpath(BinDeps.depsdir(sdpawrap), "usr")
 sdpawrap_srcdir = joinpath(BinDeps.depsdir(sdpawrap), "src", "sdpawrap")
 sdpawrap_builddir = joinpath(BinDeps.depsdir(sdpawrap), "builds", "sdpa_wrap")
 
-lib_prefix = @static is_windows() ? "" : "lib"
+lib_prefix = @static Sys.iswindows() ? "" : "lib"
 libdir_opt = ""
 
-makeopts = ["--", "-j", "$(Sys.CPU_CORES+2)"]
+makeopts = ["--", "-j", "$(Sys.CPU_THREADS + 2)"]
 
 # Set generator if on windows
 genopt = "Unix Makefiles"
-@static if is_windows()
+@static if Sys.iswindows()
   makeopts = "--"
   if Sys.WORD_SIZE == 64
     genopt = "Visual Studio 14 2015 Win64"

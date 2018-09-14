@@ -1,5 +1,3 @@
-#__precompile__()
-
 module SDPA
 
 using CxxWrap
@@ -12,6 +10,10 @@ else
 end
 
 wrap_module(_l_sdpa_wrap, SDPA)
+
+function __init__()
+    @initcxx
+end
 
 include("blockmat.jl")
 include("options.jl")

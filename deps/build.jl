@@ -1,3 +1,5 @@
+using Libdl
+
 using BinDeps
 # If I do not do using CxxWrap, when BinDeps try dlopen on libsdpawrap.so, I get
 # ERROR: could not load library "~/.julia/v0.5/SDPA/deps/usr/lib/libsdpawrap"

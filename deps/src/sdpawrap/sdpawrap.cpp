@@ -8,10 +8,8 @@ namespace jlcxx
   template<> struct IsBits<SDPA::ParameterType> : std::true_type {};
 }
 
-JULIA_CPP_MODULE_BEGIN(registry)
-
-    jlcxx::Module& sdpa = registry.create_module("SDPA");
-
+JLCXX_MODULE define_julia_module(jlcxx::Module& sdpa)
+{
     sdpa.add_bits<SDPA::ConeType>("ConeType");
     sdpa.set_const("SDP", SDPA::SDP);
     sdpa.set_const("SOCP", SDPA::SOCP);
@@ -72,6 +70,4 @@ JULIA_CPP_MODULE_BEGIN(registry)
         .method("setParameterEpsilonDash", &SDPA::setParameterEpsilonDash);
 
       //.method("writeInputSparse", &SDPA::writeInputSparse);
-
-
-JULIA_CPP_MODULE_END
+}
