@@ -9,7 +9,7 @@ else
     error("SDPA not properly installed. Please run Pkg.build(\"SDPA\")")
 end
 
-wrap_module(_l_sdpa_wrap, SDPA)
+@wrapmodule(joinpath(dirname(dirname(pathof(SDPA))), "deps", "usr", "lib", "libsdpa"))
 
 function __init__()
     @initcxx

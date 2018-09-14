@@ -10,7 +10,7 @@ lapack = library_dependency("liblapack", alias=["liblapack.dll"])
 depends = JULIA_LAPACK ? [] : [blas, lapack]
 
 # It will be called immediately, so if we add providers for blas/lapack, it won't work and BinDeps._find_library will return an empty vector
-function ldflags(libpath::String, libname::String)
+function ldflags(libpath::AbstractString, libname::AbstractString)
     libdir = dirname(libpath)
     # I use [4:end] to drop the "lib" at the beginning
     linkname = libname[4:end]
@@ -24,10 +24,10 @@ function ldflags(libpath::String, libname::String)
     end
 end
 
-function ldflags_from_libname(libname::String)
+function ldflags_from_libname(libname::AbstractString)
     return ldflags(Libdl.dlpath(libname), libname)
 end
-function ldflags_from_libpath(libpath::String)
+function ldflags_from_libpath(libpath::AbstractString)
     return ldflags(libpath, first(split(basename(libpath), '.', limit=2)))
 end
 
