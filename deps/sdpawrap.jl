@@ -1,6 +1,6 @@
 sdpawrap = library_dependency("sdpawrap", aliases=["libsdpawrap"], depends=[depends; sdpa])
 
-jlcxx_dir = joinpath(CxxWrap.prefix().path, "cmake")
+jlcxx_dir = joinpath(CxxWrap.prefix().path, "lib", "cmake")
 
 prefix=joinpath(BinDeps.depsdir(sdpawrap), "usr")
 sdpawrap_srcdir = joinpath(BinDeps.depsdir(sdpawrap), "src", "sdpawrap")
