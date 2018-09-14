@@ -19,8 +19,11 @@ const optimizer = MOIU.CachingOptimizer(SDModelData{Float64}(), SDPA.SDPAOptimiz
 const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 
 @testset "Linear tests" begin
-    MOIT.contlineartest(MOIB.SplitInterval{Float64}(optimizer), config)
+    MOIT.contlineartest(MOIB.SplitInterval{Float64}(optimizer), config,
+                        ["linear12"])
 end
 @testset "Conic tests" begin
-    MOIT.contconictest(MOIB.RootDet{Float64}(MOIB.GeoMean{Float64}(MOIB.RSOCtoPSD{Float64}(MOIB.SOCtoPSD{Float64}(optimizer)))), config, ["psds", "rootdets", "logdet", "exp"])
+    MOIT.contconictest(MOIB.RootDet{Float64}(MOIB.GeoMean{Float64}(MOIB.RSOCtoPSD{Float64}(MOIB.SOCtoPSD{Float64}(optimizer)))),
+                       config,
+                       ["lin3", "soc3", "psds", "rootdets", "logdet", "exp"])
 end

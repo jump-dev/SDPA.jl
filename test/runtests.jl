@@ -1,5 +1,7 @@
+using LinearAlgebra
 using SDPA
-using Base.Test
+
+using Test
 
 include("example1.jl")
 include("example2.jl")
