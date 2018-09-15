@@ -29,7 +29,7 @@ provides(BuildProcess,
         ChangeDirectory(sdpawrap_builddir)
         FileRule(joinpath(prefix, "lib$libdir_opt", "$(lib_prefix)sdpawrap.$(Libdl.dlext)"),
             @build_steps begin
-               `cmake -G "$genopt" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_PREFIX_PATH="$jlcxx_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" $sdpawrap_srcdir`
+                `cmake -G "$genopt" -DJulia_ROOT="$(dirname(Sys.BINDIR))" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_PREFIX_PATH="$jlcxx_dir" -DSDPA_DIR="$sdpa_dir" -DMUMPS_INCLUDE_DIR="$mumps_include_dir" -DSDPA_LIBRARY="$sdpa_library" $sdpawrap_srcdir`
                `cmake --build . --config Release --target install $makeopts`
             end)
     end
