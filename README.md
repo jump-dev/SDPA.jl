@@ -9,6 +9,7 @@ Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming s
 Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
 
 ## Parameters
+
 SDPA has 10 parameters that can be set separately using, e.g. `SDPASolver(MaxIteration=100)` to set the parameter with name `MaxIteration` at the value 100.
 SDPA has 3 modes that give values to all 10 parameters. By default, we put SDPA in the `PARAMETER_DEFAULT` mode.
 The three modes are as follow:
