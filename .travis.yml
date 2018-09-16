@@ -28,6 +28,8 @@ notifications:
 # brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
 before_install:
   - eval "CC=gcc-5 && CXX=g++-5" # see https://docs.travis-ci.com/user/languages/cpp/
+  - alias gcc=gcc-5 # CC=gcc and
+  - alias g++=g++-5 # CXX=g++ is hardcoded in SDPA build files
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
 after_success:
   # push coverage results to Coveralls and Codecov
