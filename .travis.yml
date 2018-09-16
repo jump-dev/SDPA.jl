@@ -8,7 +8,7 @@ os:
 julia:
   - 0.7
   - 1.0
-# G++ need to be updated to version 5 for C++14 to be supported
+# G++ need to be updated to version 5 at least for C++14 to be supported
 # https://docs.travis-ci.com/user/languages/cpp/
 addons:
   apt_packages:
@@ -19,7 +19,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - g++-5
+      - g++-6
 matrix:
   allow_failures:
     - julia: nightly
@@ -28,12 +28,12 @@ notifications:
 # brew update for "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
 # brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
 before_install:
-  - eval "CC=gcc-5 && CXX=g++-5" # see https://docs.travis-ci.com/user/languages/cpp/
+  - eval "CC=gcc-6 && CXX=g++-6" # see https://docs.travis-ci.com/user/languages/cpp/
   - sudo rm /usr/bin/gcc
-  - sudo ln /usr/bin/gcc-5 /usr/bin/gcc
+  - sudo ln /usr/bin/gcc-6 /usr/bin/gcc
   - sudo ls -l /usr/bin/gcc
   - sudo rm /usr/bin/g++
-  - sudo ln /usr/bin/g++-5 /usr/bin/g++
+  - sudo ln /usr/bin/g++-6 /usr/bin/g++
   - sudo ls -l /usr/bin/g++
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
 after_success:
