@@ -5,18 +5,18 @@ os:
   - linux
   - osx
 # GCC need to be updated for C++14 to be supported
-# https://stackoverflow.com/questions/35110123/travis-ci-with-c14-and-linux
+# https://docs.travis-ci.com/user/languages/cpp/
 matrix:
   include:
     - os: linux
-      env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
             - g++-5
-          sources: &sources
-            - llvm-toolchain-precise-3.8
-            - ubuntu-toolchain-r-test
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 julia:
   - 0.7
   - 1.0
@@ -33,6 +33,7 @@ notifications:
 # brew update for "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
 # brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
 before_install:
+  - eval "${MATRIX_EVAL}" # see https://docs.travis-ci.com/user/languages/cpp/
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
 after_success:
   # push coverage results to Coveralls and Codecov
