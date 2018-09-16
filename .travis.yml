@@ -1,5 +1,6 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 dist: trusty
+sudo: true
 language: julia
 os:
   - linux
@@ -28,8 +29,12 @@ notifications:
 # brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
 before_install:
   - eval "CC=gcc-5 && CXX=g++-5" # see https://docs.travis-ci.com/user/languages/cpp/
-  - alias gcc=gcc-5 # CC=gcc and
-  - alias g++=g++-5 # CXX=g++ is hardcoded in SDPA build files
+  - sudo rm /usr/bin/gcc
+  - sudo ln /usr/bin/gcc-5 /usr/bin/gcc
+  - sudo ls -l /usr/bin/gcc
+  - sudo rm /usr/bin/g++
+  - sudo ln /usr/bin/g++-5 /usr/bin/g++
+  - sudo ls -l /usr/bin/g++
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
 after_success:
   # push coverage results to Coveralls and Codecov
