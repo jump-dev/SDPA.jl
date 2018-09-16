@@ -4,6 +4,19 @@ language: julia
 os:
   - linux
   - osx
+# GCC need to be updated for C++14 to be supported
+# https://stackoverflow.com/questions/35110123/travis-ci-with-c14-and-linux
+matrix:
+  include:
+    - os: linux
+      env: COMPILER_NAME=gcc CXX=g++-5 CC=gcc-5
+      addons:
+        apt:
+          packages:
+            - g++-5
+          sources: &sources
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
 julia:
   - 0.7
   - 1.0
