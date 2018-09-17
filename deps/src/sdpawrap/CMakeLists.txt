@@ -15,7 +15,7 @@ endif()
 
 find_package(JlCxx)
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_DIR}/../../../lib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_DIR}/../")
 
 # SDPA_DIR is set by build.jl
 include_directories(${SDPA_DIR})
