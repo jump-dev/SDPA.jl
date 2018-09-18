@@ -15,6 +15,7 @@ endif()
 
 find_package(JlCxx)
 
+# See https://github.com/blegat/SDPA.jl/pull/11#issuecomment-422154825
 get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
 get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
