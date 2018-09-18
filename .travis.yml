@@ -28,8 +28,7 @@ notifications:
 # brew update for "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
 # brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
 before_install:
-  - eval "CC=gcc-8 && CXX=g++-8" # see https://docs.travis-ci.com/user/languages/cpp/
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
 after_success:
   # push coverage results to Coveralls and Codecov
