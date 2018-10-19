@@ -9,7 +9,7 @@ sdpasrcdir = joinpath(BinDeps.srcdir(sdpa), sdpaname)
 sdpaprefixdir = joinpath(BinDeps.usrdir(sdpa))
 sdpalibdir = joinpath(sdpaprefixdir, "lib")
 target="libsdpa.$(Libdl.dlext)"
-@static if is_apple()
+@static if Sys.isapple()
     target0="libsdpa.0.$(Libdl.dlext)"
 else
     target0="libsdpa.$(Libdl.dlext).0"
@@ -52,7 +52,7 @@ provides(BuildProcess,
             `./configure CFLAGS="$(fix64("-funroll-all-loops"))" CXXFLAGS="$(fix64("-funroll-all-loops"))" FCFLAGS="$(fix64("-funroll-all-loops"))" --with-blas="$(blas_lib())" --with-lapack="$(lapack_lib())"`
             `make`
             `cp .libs/$target .libs/$target0 $sdpalibdir` # It seems that sdpawrap links itself with $target.0
-            @static if is_apple()
+            @static if Sys.isapple()
                 # Change it from /usr/local/lib/libsdpa.0.dylib to @rpath/libsdpa.0/dylib
                 `install_name_tool -id @rpath/$target0 $sdpalibdir/$target`
             end

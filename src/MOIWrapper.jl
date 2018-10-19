@@ -1,6 +1,3 @@
-using SemidefiniteOptInterface
-SDOI = SemidefiniteOptInterface
-
 export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 
 using MathOptInterface
@@ -72,7 +69,7 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
     elseif status == pdFEAS
         return MOI.Success
     elseif status == pdINF
-        return MOI.Success
+        return MOI.InfeasibleOrUnbounded
     elseif status == pFEAS_dINF
         return MOI.Success
     elseif status == pINF_dFEAS
@@ -86,9 +83,6 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
     end
 end
 
-function MOI.canget(m::SDPASDOptimizer, ::MOI.PrimalStatus)
-    !(getPhaseValue(m.problem) in [noINFO, pINF_dFEAS, dUNBD, pdINF])
-end
 function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
@@ -100,7 +94,7 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     elseif status == pdFEAS
         return MOI.FeasiblePoint
     elseif status == pdINF
-        return MOI.InfeasibilityCertificate
+        return MOI.UnknownResultStatus
     elseif status == pFEAS_dINF
         return MOI.InfeasibilityCertificate
     elseif status == pINF_dFEAS
@@ -114,9 +108,6 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     end
 end
 
-function MOI.canget(m::SDPASDOptimizer, ::MOI.DualStatus)
-    !(getPhaseValue(m.problem) in [noINFO, pFEAS_dINF, pUNBD])
-end
 function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
@@ -128,7 +119,7 @@ function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
     elseif status == pdFEAS
         return MOI.FeasiblePoint
     elseif status == pdINF
-        return MOI.InfeasibilityCertificate
+        return MOI.UnknownResultStatus
     elseif status == pFEAS_dINF
         return MOI.InfeasiblePoint
     elseif status == pINF_dFEAS
