@@ -1,9 +1,10 @@
+import MathProgBase
 @testset "Linear tests" begin
-    include(joinpath(Pkg.dir("MathProgBase"),"test","linproginterface.jl"))
+    include(joinpath(dirname(dirname(pathof(MathProgBase))), "test", "linproginterface.jl"))
     linprogsolvertest(SDPASolver(), 1e-5)
 end
 @testset "Conic tests" begin
-    include(joinpath(Pkg.dir("MathProgBase"),"test","conicinterface.jl"))
+    include(joinpath(dirname(dirname(pathof(MathProgBase))), "test", "conicinterface.jl"))
 
     @testset "Conic linear tests" begin
         coniclineartest(SDPASolver(), duals=true, tol=1e-5)
