@@ -21,7 +21,7 @@ SDOI = SemidefiniteOptInterface
 
 include("blockmat.jl")
 include("options.jl")
-include("MOIWrapper.jl")
-include("MPBWrapper.jl")
+include("MOI_wrapper.jl")
+include("MPB_wrapper.jl")
 
 end # module
