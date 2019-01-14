@@ -14,6 +14,12 @@ mutable struct SDPASDOptimizer <: SDOI.AbstractSDOptimizer
 end
 SDPAOptimizer(; kws...) = SDOI.SDOIOptimizer(SDPASDOptimizer(; kws...))
 
+MOI.get(::SDPASDOptimizer, ::MOI.SolverName) = "SDPA"
+
+function MOI.empty!(optimizer::SDPASDOptimizer)
+    optimizer.problem = SDPAProblem()
+end
+
 function SDOI.init!(m::SDPASDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     @assert nconstrs >= 0
     dummy = nconstrs == 0
@@ -61,75 +67,75 @@ end
 function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.OtherError
+        return MOI.OPTIMIZE_NOT_CALLED
     elseif status == pFEAS
-        return MOI.SlowProgress
+        return MOI.SLOW_PROGRESS
     elseif status == dFEAS
-        return MOI.SlowProgress
+        return MOI.SLOW_PROGRESS
     elseif status == pdFEAS
-        return MOI.Success
+        return MOI.OPTIMAL
     elseif status == pdINF
-        return MOI.InfeasibleOrUnbounded
+        return MOI.INFEASIBLE_OR_UNBOUNDED
     elseif status == pFEAS_dINF
-        return MOI.Success
+        return MOI.DUAL_INFEASIBLE
     elseif status == pINF_dFEAS
-        return MOI.Success
+        return MOI.INFEASIBLE
     elseif status == pdOPT
-        return MOI.Success
+        return MOI.OPTIMAL
     elseif status == pUNBD
-        return MOI.Success
+        return MOI.DUAL_INFEASIBLE
     elseif status == dUNBD
-        return MOI.Success
+        return MOI.INFEASIBLE
     end
 end
 
 function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == dFEAS
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pdFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdINF
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS_dINF
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == pINF_dFEAS
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == pdOPT
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pUNBD
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == dUNBD
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     end
 end
 
 function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == dFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdINF
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS_dINF
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == pINF_dFEAS
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == pdOPT
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pUNBD
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == dUNBD
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     end
 end
 

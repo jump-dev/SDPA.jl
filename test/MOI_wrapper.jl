@@ -1,9 +1,9 @@
 using MathOptInterface
 const MOI = MathOptInterface
 const MOIT = MOI.Test
+const MOIU = MOI.Utilities
 const MOIB = MOI.Bridges
 
-const MOIU = MOI.Utilities
 MOIU.@model(SDModelData,
             (),
             (MOI.EqualTo, MOI.GreaterThan, MOI.LessThan),
@@ -14,9 +14,15 @@ MOIU.@model(SDModelData,
             (MOI.ScalarAffineFunction,),
             (MOI.VectorOfVariables,),
             (MOI.VectorAffineFunction,))
-const optimizer = MOIU.CachingOptimizer(SDModelData{Float64}(), SDPA.SDPAOptimizer())
+# UniversalFallback is needed for starting values, even if they are ignored by SDPA
+const optimizer = MOIU.CachingOptimizer(MOIU.UniversalFallback(SDModelData{Float64}()),
+                                        SDPA.SDPAOptimizer())
 # test 1e-3 because of rsoc3 test, otherwise, 1e-5 is enough
 const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
+
+@testset "SolverName" begin
+    @test MOI.get(optimizer, MOI.SolverName()) == "SDPA"
+end
 
 @testset "Linear tests" begin
     MOIT.contlineartest(MOIB.SplitInterval{Float64}(optimizer), config,
