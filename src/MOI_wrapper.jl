@@ -3,18 +3,22 @@ export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 using MathOptInterface
 MOI = MathOptInterface
 
-export SDPAOptimizer
-
-mutable struct SDPASDOptimizer <: SDOI.AbstractSDOptimizer
+mutable struct SDOptimizer <: SDOI.AbstractSDOptimizer
     problem::SDPAProblem
     options::Dict{Symbol,Any}
-    function SDPASDOptimizer(; kwargs...)
+    function SDOptimizer(; kwargs...)
         new(SDPAProblem(), Dict{Symbol, Any}(kwargs))
     end
 end
-SDPAOptimizer(; kws...) = SDOI.SDOIOptimizer(SDPASDOptimizer(; kws...))
+Optimizer(; kws...) = SDOI.SDOIOptimizer(SDOptimizer(; kws...))
 
-function SDOI.init!(m::SDPASDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
+MOI.get(::SDOptimizer, ::MOI.SolverName) = "SDPA"
+
+function MOI.empty!(optimizer::SDOptimizer)
+    optimizer.problem = SDPAProblem()
+end
+
+function SDOI.init!(m::SDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     @assert nconstrs >= 0
     dummy = nconstrs == 0
     if dummy
@@ -37,106 +41,106 @@ function SDOI.init!(m::SDPASDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     end
 end
 
-function SDOI.setconstraintconstant!(m::SDPASDOptimizer, val, constr::Integer)
+function SDOI.setconstraintconstant!(m::SDOptimizer, val, constr::Integer)
     @assert constr > 0
     #println("b[$constr] = $val")
     inputCVec(m.problem, constr, val)
 end
-function SDOI.setconstraintcoefficient!(m::SDPASDOptimizer, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
+function SDOI.setconstraintcoefficient!(m::SDOptimizer, coef, constr::Integer, blk::Integer, i::Integer, j::Integer)
     @assert constr > 0
     #println("A[$constr][$blk][$i, $j] = $coef")
     inputElement(m.problem, constr, blk, i, j, float(coef), false)
 end
-function SDOI.setobjectivecoefficient!(m::SDPASDOptimizer, coef, blk::Integer, i::Integer, j::Integer)
+function SDOI.setobjectivecoefficient!(m::SDOptimizer, coef, blk::Integer, i::Integer, j::Integer)
     #println("C[$blk][$i, $j] = $coef")
     inputElement(m.problem, 0, blk, i, j, float(coef), false)
 end
 
-function MOI.optimize!(m::SDPASDOptimizer)
+function MOI.optimize!(m::SDOptimizer)
     SDPA.initializeUpperTriangle(m.problem, false)
     SDPA.initializeSolve(m.problem)
     SDPA.solve(m.problem)
 end
 
-function MOI.get(m::SDPASDOptimizer, ::MOI.TerminationStatus)
+function MOI.get(m::SDOptimizer, ::MOI.TerminationStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.OtherError
+        return MOI.OPTIMIZE_NOT_CALLED
     elseif status == pFEAS
-        return MOI.SlowProgress
+        return MOI.SLOW_PROGRESS
     elseif status == dFEAS
-        return MOI.SlowProgress
+        return MOI.SLOW_PROGRESS
     elseif status == pdFEAS
-        return MOI.Success
+        return MOI.OPTIMAL
     elseif status == pdINF
-        return MOI.InfeasibleOrUnbounded
+        return MOI.INFEASIBLE_OR_UNBOUNDED
     elseif status == pFEAS_dINF
-        return MOI.Success
+        return MOI.DUAL_INFEASIBLE
     elseif status == pINF_dFEAS
-        return MOI.Success
+        return MOI.INFEASIBLE
     elseif status == pdOPT
-        return MOI.Success
+        return MOI.OPTIMAL
     elseif status == pUNBD
-        return MOI.Success
+        return MOI.DUAL_INFEASIBLE
     elseif status == dUNBD
-        return MOI.Success
+        return MOI.INFEASIBLE
     end
 end
 
-function MOI.get(m::SDPASDOptimizer, ::MOI.PrimalStatus)
+function MOI.get(m::SDOptimizer, ::MOI.PrimalStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == dFEAS
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pdFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdINF
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS_dINF
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == pINF_dFEAS
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == pdOPT
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pUNBD
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == dUNBD
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     end
 end
 
-function MOI.get(m::SDPASDOptimizer, ::MOI.DualStatus)
+function MOI.get(m::SDOptimizer, ::MOI.DualStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == dFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdFEAS
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pdINF
-        return MOI.UnknownResultStatus
+        return MOI.UNKNOWN_RESULT_STATUS
     elseif status == pFEAS_dINF
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == pINF_dFEAS
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     elseif status == pdOPT
-        return MOI.FeasiblePoint
+        return MOI.FEASIBLE_POINT
     elseif status == pUNBD
-        return MOI.InfeasiblePoint
+        return MOI.INFEASIBLE_POINT
     elseif status == dUNBD
-        return MOI.InfeasibilityCertificate
+        return MOI.INFEASIBILITY_CERTIFICATE
     end
 end
 
-SDOI.getprimalobjectivevalue(m::SDPASDOptimizer) = getPrimalObj(m.problem)
-SDOI.getdualobjectivevalue(m::SDPASDOptimizer) = getDualObj(m.problem)
-SDOI.getX(m::SDPASDOptimizer) = PrimalSolution(m.problem)
-function SDOI.gety(m::SDPASDOptimizer)
+SDOI.getprimalobjectivevalue(m::SDOptimizer) = getPrimalObj(m.problem)
+SDOI.getdualobjectivevalue(m::SDOptimizer) = getDualObj(m.problem)
+SDOI.getX(m::SDOptimizer) = PrimalSolution(m.problem)
+function SDOI.gety(m::SDOptimizer)
     unsafe_wrap(Array, getResultXVec(m.problem), getConstraintNumber(m.problem))
 end
-SDOI.getZ(m::SDPASDOptimizer) = VarDualSolution(m.problem)
+SDOI.getZ(m::SDOptimizer) = VarDualSolution(m.problem)
