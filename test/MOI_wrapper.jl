@@ -15,7 +15,8 @@ MOIU.@model(SDModelData,
             (MOI.VectorOfVariables,),
             (MOI.VectorAffineFunction,))
 # UniversalFallback is needed for starting values, even if they are ignored by SDPA
-const optimizer = MOIU.CachingOptimizer(MOIU.UniversalFallback(SDModelData{Float64}()),
+const cache = MOIU.UniversalFallback(SDModelData{Float64}())
+const optimizer = MOIU.CachingOptimizer(cache,
                                         SDPA.Optimizer())
 # test 1e-3 because of rsoc3 test, otherwise, 1e-5 is enough
 const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)

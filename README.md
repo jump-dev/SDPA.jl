@@ -74,12 +74,12 @@ Windows support is still a work in progress.
 [pkg-0.7-img]: http://pkg.julialang.org/badges/SDPA_0.7.svg
 [pkg-0.7-url]: http://pkg.julialang.org/?pkg=SDPA
 
-[build-img]: https://travis-ci.org/blegat/SDPA.jl.svg?branch=master
-[build-url]: https://travis-ci.org/blegat/SDPA.jl
+[build-img]: https://travis-ci.org/JuliaOpt/SDPA.jl.svg?branch=master
+[build-url]: https://travis-ci.org/JuliaOpt/SDPA.jl
 [coveralls-img]: https://coveralls.io/repos/blegat/SDPA.jl/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/blegat/SDPA.jl?branch=master
-[codecov-img]: http://codecov.io/github/blegat/SDPA.jl/coverage.svg?branch=master
-[codecov-url]: http://codecov.io/github/blegat/SDPA.jl?branch=master
+[codecov-img]: http://codecov.io/github/JuliaOpt/SDPA.jl/coverage.svg?branch=master
+[codecov-url]: http://codecov.io/github/JuliaOpt/SDPA.jl?branch=master
 
 [zenodo-url]: https://doi.org/10.5281/zenodo.1285668
 [zenodo-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.1285668.svg
