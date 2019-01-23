@@ -1,4 +1,4 @@
-using BinaryProvider # requires BinaryProvider 0.3.0 or later
+using BinaryProvider # requires BinaryProvider 0.5.3 or later
 using CxxWrap
 
 # Parse some basic command-line arguments
