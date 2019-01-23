@@ -1,35 +1,13 @@
-# Documentation: http://docs.travis-ci.com/user/languages/julia/
-dist: trusty
-sudo: true
 language: julia
 os:
   - linux
   - osx
 julia:
-  - 0.7
   - 1.0
-# G++ need to be updated to version 5 at least for C++14 to be supported
-# https://docs.travis-ci.com/user/languages/cpp/
-addons:
-  apt_packages:
-    - gfortran
-    - liblapack-dev
-    - libopenblas-dev
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-8
-matrix:
-  allow_failures:
-    - julia: nightly
+
 notifications:
   email: false
-# brew update for "Homebrew must be run under Ruby 2.3! You're running 2.0.0"
-# brew cask uninstall oclint for https://github.com/travis-ci/travis-ci/issues/8826
-before_install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; brew cask uninstall oclint; brew install libtool gcc; fi
+  
 after_success:
   # push coverage results to Coveralls and Codecov
   - julia -e 'cd(Pkg.dir("SDPA")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'

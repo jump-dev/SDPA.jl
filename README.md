@@ -40,34 +40,35 @@ The following table gives the default value for each parameter.
 
 ## Installation
 
-You can install SDPA.jl as follows:
+The package is registered in `METADATA.jl` and so can be installed with `Pkg.add`.
+
+```
+julia> import Pkg; Pkg.add("Clp")
+```
+
+SDPA.jl will use [BinaryProvider.jl](https://github.com/JuliaPackaging/BinaryProvider.jl) to automatically install the SDPA binaries for Linux and OS X. This should work for both the official Julia binaries from `https://julialang.org/downloads/` and source-builds that used `gcc` versions 7 or 8. 
+
+*NOTE:* If you see an error similar to 
 ```julia
-julia> Pkg.clone("https://github.com/blegat/SDPA.jl.git")
-julia> Pkg.build("SDPA")
+INFO: Precompiling module GZip.
+ERROR: LoadError: LoadError: error compiling anonymous: could not load library "libz"
+```
+please see [GZip.jl#54](https://github.com/JuliaIO/GZip.jl/issues/54) or [Flux.jl#343](https://github.com/FluxML/Flux.jl/issues/343). In particular, in Ubuntu this issue may be resolved by running
+```bash
+sudo apt-get install zlib1g-dev
 ```
 
-The `Pkg.build` command will compile SDPA from source, you will need to install the following dependencies for the compilation to work.
+## Custom Installation
 
-### Ubuntu
-```sh
-$ sudo apt-get install build-essential gfortran liblapack-dev libopenblas-dev
+To install custom built SDPA binaries set the environmental variable `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`. For instance, if the libraries are installed in `/opt/lib`, then call
+```julia
+ENV["JULIA_SDPA_LIBRARY_PATH"] = "/opt/lib"
+import Pkg; Pkg.build("SDPA")
 ```
-**Note**: This package currently does not work with the LAPACK/OPENBLAS versions shipped with Julia; see [#1](https://github.com/blegat/SDPA.jl/issues/1).
+If you do not want BinaryProvider to download the default binaries on install, set `JULIA_SDPA_LIBRARY_PATH` before calling `import Pkg; Pkg.add("SDPA")`.
 
-### Arch Linux
-```sh
-$ sudo pacman -S gcc-gfortran
-```
-**Note**: The Julia Arch Linux package has already installed the system LAPACK and OPENBLAS so you shouldn't need to do anything for these two dependencies.
+To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`.
 
-### Mac OS X
-```sh
-$ xcode-select --install # Optional, that makes homebrew downloads a precompiled binary for gcc
-$ brew install libtool gcc cmake wget autoconf automake # gfortran comes with the gcc package
-```
-
-### Windows
-Windows support is still a work in progress.
 
 [pkg-0.6-img]: http://pkg.julialang.org/badges/SDPA_0.6.svg
 [pkg-0.6-url]: http://pkg.julialang.org/?pkg=SDPA
