@@ -1,9 +1,9 @@
 # SDPA
 
-| **PackageEvaluator** | **Build Status** | **References to cite** |
-|:--------------------:|:----------------:|:----------------------:|
-| [![][pkg-0.6-img]][pkg-0.6-url] | [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
-| [![][pkg-0.7-img]][pkg-0.7-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
+| **Build Status** | **References to cite** |
+|:----------------:|:----------------------:|
+| [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
+| [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
 Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver.
 Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
@@ -69,11 +69,6 @@ If you do not want BinaryProvider to download the default binaries on install, s
 
 To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`.
 
-
-[pkg-0.6-img]: http://pkg.julialang.org/badges/SDPA_0.6.svg
-[pkg-0.6-url]: http://pkg.julialang.org/?pkg=SDPA
-[pkg-0.7-img]: http://pkg.julialang.org/badges/SDPA_0.7.svg
-[pkg-0.7-url]: http://pkg.julialang.org/?pkg=SDPA
 
 [build-img]: https://travis-ci.org/JuliaOpt/SDPA.jl.svg?branch=master
 [build-url]: https://travis-ci.org/JuliaOpt/SDPA.jl
