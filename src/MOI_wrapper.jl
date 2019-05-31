@@ -5,14 +5,61 @@ MOI = MathOptInterface
 
 mutable struct SDOptimizer <: SDOI.AbstractSDOptimizer
     problem::SDPAProblem
-    options::Dict{Symbol,Any}
+    solve_time::Float64
+    silent::Bool
+    options::Dict{Symbol, Any}
     function SDOptimizer(; kwargs...)
-        new(SDPAProblem(), Dict{Symbol, Any}(kwargs))
+		optimizer = new(SDPAProblem(), NaN, false, Dict{Symbol, Any}())
+		for (key, value) in kwargs
+			MOI.set(optimizer, MOI.RawParameter(key), value)
+		end
+		return optimizer
     end
 end
 Optimizer(; kws...) = SDOI.SDOIOptimizer(SDOptimizer(; kws...))
 
+function MOI.supports(optimizer::SDOptimizer, param::MOI.RawParameter)
+	return param.name in keys(SET_PARAM)
+end
+function MOI.set(optimizer::SDOptimizer, param::MOI.RawParameter, value)
+	if !MOI.supports(optimizer, param)
+		throw(MOI.UnsupportedAttribute(param))
+	end
+	optimizer.options[param.name] = value
+end
+function MOI.get(optimizer::SDOptimizer, param::MOI.RawParameter)
+	# TODO: This gives a poor error message if the name of the parameter is invalid.
+	return optimizer.options[param.name]
+end
+
+MOI.supports(::SDOptimizer, ::MOI.Silent) = true
+function MOI.set(optimizer::SDOptimizer, ::MOI.Silent, value::Bool)
+	optimizer.silent = value
+end
+MOI.get(optimizer::SDOptimizer, ::MOI.Silent) = optimizer.silent
+
 MOI.get(::SDOptimizer, ::MOI.SolverName) = "SDPA"
+
+# See https://www.researchgate.net/publication/247456489_SDPA_SemiDefinite_Programming_Algorithm_User's_Manual_-_Version_600
+# "SDPA (SemiDefinite Programming Algorithm) User's Manual — Version 6.00" Section 6.2
+const RAW_STATUS = Dict(
+    noINFO        => "The iteration has exceeded the maxIteration and stopped with no informationon the primal feasibility and the dual feasibility.",
+    pdOPT => "The normal termination yielding both primal and dual approximate optimal solutions.",
+    pFEAS => "The primal problem got feasible but the iteration has exceeded the maxIteration and stopped.",
+    dFEAS => "The dual problem got feasible but the iteration has exceeded the maxIteration and stopped.",
+    pdFEAS => "Both primal problem and the dual problem got feasible, but the iterationhas exceeded the maxIteration and stopped.",
+    pdINF => "At least one of the primal problem and the dual problem is expected to be infeasible.",
+    pFEAS_dINF => "The primal problem has become feasible but the dual problem is expected to be infeasible.",
+    pINF_dFEAS => "The dual problem has become feasible but the primal problem is expected to be infeasible.",
+    pUNBD => "The primal problem is expected to be unbounded.",
+    dUNBD => "The dual problem is expected to be unbounded.")
+
+function MOI.get(optimizer::SDOptimizer, ::MOI.RawStatusString)
+	return RAW_STATUS[getPhaseValue(optimizer.problem)]
+end
+function MOI.get(optimizer::SDOptimizer, ::MOI.SolveTime)
+	return optimizer.solve_time
+end
 
 function MOI.empty!(optimizer::SDOptimizer)
     optimizer.problem = SDPAProblem()
@@ -27,6 +74,7 @@ function SDOI.init!(m::SDOptimizer, blkdims::Vector{Int}, nconstrs::Int)
     end
     m.problem = SDPAProblem()
     setParameterType(m.problem, PARAMETER_DEFAULT)
+	# TODO Take `silent` into account here
     setparameters!(m.problem, m.options)
     inputConstraintNumber(m.problem, nconstrs)
     inputBlockNumber(m.problem, length(blkdims))
@@ -57,9 +105,11 @@ function SDOI.setobjectivecoefficient!(m::SDOptimizer, coef, blk::Integer, i::In
 end
 
 function MOI.optimize!(m::SDOptimizer)
+	start_time = time()
     SDPA.initializeUpperTriangle(m.problem, false)
     SDPA.initializeSolve(m.problem)
     SDPA.solve(m.problem)
+    m.solve_time = time() - start_time
 end
 
 function MOI.get(m::SDOptimizer, ::MOI.TerminationStatus)
@@ -137,8 +187,8 @@ function MOI.get(m::SDOptimizer, ::MOI.DualStatus)
     end
 end
 
-SDOI.getprimalobjectivevalue(m::SDOptimizer) = getPrimalObj(m.problem)
-SDOI.getdualobjectivevalue(m::SDOptimizer) = getDualObj(m.problem)
+MOI.get(m::SDOptimizer, ::MOI.ObjectiveValue) = getPrimalObj(m.problem)
+MOI.get(m::SDOptimizer, ::MOI.DualObjectiveValue) = getDualObj(m.problem)
 SDOI.getX(m::SDOptimizer) = PrimalSolution(m.problem)
 function SDOI.gety(m::SDOptimizer)
     unsafe_wrap(Array, getResultXVec(m.problem), getConstraintNumber(m.problem))

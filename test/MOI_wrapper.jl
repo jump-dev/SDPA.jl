@@ -12,15 +12,10 @@ const optimizer = SDPA.Optimizer()
 end
 
 MOIU.@model(SDModelData,
-            (),
-            (MOI.EqualTo, MOI.GreaterThan, MOI.LessThan),
+            (), (MOI.EqualTo, MOI.GreaterThan, MOI.LessThan),
             (MOI.Zeros, MOI.Nonnegatives, MOI.Nonpositives,
-             MOI.PositiveSemidefiniteConeTriangle),
-            (),
-            (MOI.SingleVariable,),
-            (MOI.ScalarAffineFunction,),
-            (MOI.VectorOfVariables,),
-            (MOI.VectorAffineFunction,))
+             MOI.PositiveSemidefiniteConeTriangle), (),
+            (), (MOI.ScalarAffineFunction,), (MOI.VectorOfVariables,), (MOI.VectorAffineFunction,))
 # UniversalFallback is needed for starting values, even if they are ignored by SDPA
 const cache = MOIU.UniversalFallback(SDModelData{Float64}())
 const cached = MOIU.CachingOptimizer(cache, optimizer)
