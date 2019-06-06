@@ -16,7 +16,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 BinaryProvider = "≥ 0.5.3"
-CxxWrap = "= 0.8.2"
+CxxWrap = "= 0.8.1"
 MathOptInterface = "0.8"
 MathProgBase = "0.7"
 SemidefiniteModels = "~0.1.1"
