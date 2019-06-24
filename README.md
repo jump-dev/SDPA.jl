@@ -23,6 +23,8 @@ The three modes are as follow:
 To set the SDPA solver in a mode you do, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST)`.
 Note that the parameters are set in the order they are given so you can set it in a mode and then modify one parameter from this mode, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST, MaxIteration=1000)`.
 
+Note that `PARAMETER_UNSTABLE_BUT_FAST` appears to be the most reliable of the three modes, at least in some cases; e.g. it gives the fewest failures on Convex.jl's tests (see [#17](https://github.com/JuliaOpt/SDPA.jl/issues/17#issuecomment-502045684)).
+
 The following table gives the default value for each parameter.
 
 | Parameter name | Default | Fast   | Slow   |
