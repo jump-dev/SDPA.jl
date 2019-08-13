@@ -28,6 +28,8 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 
 @testset "Unit" begin
     MOIT.unittest(bridged, config, [
+        # `TimeLimitSec` not supported.
+        "time_limit_sec",
         # SingleVariable objective of bridged variables, will be solved by objective bridges
         "solve_time", "raw_status_string", "solve_singlevariable_obj",
         # Quadratic functions are not supported
@@ -39,7 +41,15 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_zero_one_with_bounds_3"])
 end
 @testset "Linear tests" begin
-    MOIT.contlineartest(bridged, config, ["linear12"])
+    # See explanation in `MOI/test/Bridges/lazy_bridge_optimizer.jl`.
+    # This is to avoid `Variable.VectorizeBridge` which does not support
+    # `ConstraintSet` modification.
+    MOIB.remove_bridge(bridged, MOIB.Constraint.ScalarSlackBridge{Float64})
+    MOIT.contlineartest(bridged, config, [
+        # `MOI.UNKNOWN_RESULT_STATUS` instead of `MOI.INFEASIBILITY_CERTIFICATE`
+        "linear8a",
+        "linear12"
+    ])
 end
 @testset "Conic tests" begin
     MOIT.contconictest(bridged, config, [
