@@ -124,33 +124,30 @@ SDPA.solve(p)
 @test SDPA.getPrimalError(p) < 1e-10
 @test SDPA.getDualError(p) < 1e-10
 
-using SemidefiniteOptInterface
-const SDOI = SemidefiniteOptInterface
-
 X = SDPA.VarDualSolution(p)
-@test isapprox(SDOI.block(X, 1), [+6.392e-08 -9.638e-09;
+@test isapprox(SDPA.block(X, 1), [+6.392e-08 -9.638e-09;
                       -9.638e-09 +4.539e-08], rtol=1e-4)
-@test isapprox(SDOI.block(X, 2), [+7.119e+00 +5.025e+00 +1.916e+00;
+@test isapprox(SDPA.block(X, 2), [+7.119e+00 +5.025e+00 +1.916e+00;
                       +5.025e+00 +4.415e+00 +2.506e+00;
                       +1.916e+00 +2.506e+00 +2.048e+00], rtol=1e-4)
-@test isapprox(SDOI.block(X, 3), Diagonal([+3.432e-01, +4.391e+00]), rtol=1e-4)
+@test isapprox(SDPA.block(X, 3), Diagonal([+3.432e-01, +4.391e+00]), rtol=1e-4)
 
 Y = SDPA.PrimalSolution(p)
 @test size(Y) == (7, 7)
 @test Y[1, 3] == 0
 @test_throws BoundsError Y[1, 0]
-@test_throws BoundsError SDOI.block(Y, 0)
-@test_throws BoundsError SDOI.block(Y, 4)
-@test_throws BoundsError SDOI.block(Y, 1)[0, 1]
-@test_throws BoundsError SDOI.block(Y, 1)[1, 3]
-@test isapprox(SDOI.block(Y, 1), [+2.640e+00 +5.606e-01;
+@test_throws BoundsError SDPA.block(Y, 0)
+@test_throws BoundsError SDPA.block(Y, 4)
+@test_throws BoundsError SDPA.block(Y, 1)[0, 1]
+@test_throws BoundsError SDPA.block(Y, 1)[1, 3]
+@test isapprox(SDPA.block(Y, 1), [+2.640e+00 +5.606e-01;
                       +5.606e-01 +3.718e+00], rtol=1e-4)
 @test isapprox(Y[6, 6], +4.087e-07, rtol=1e-4)
-@test isapprox(SDOI.block(Y, 2), [+7.616e-01 -1.514e+00 +1.139e+00;
+@test isapprox(SDPA.block(Y, 2), [+7.616e-01 -1.514e+00 +1.139e+00;
                       -1.514e+00 +3.008e+00 -2.264e+00;
                       +1.139e+00 -2.264e+00 +1.705e+00], rtol=1e-3)
 @test isapprox(Y[4, 3], -1.514e+00, rtol=1e-3)
-@test isapprox(SDOI.block(Y, 3), Diagonal([+4.087e-07, +3.195e-08]), rtol=1e-4)
+@test isapprox(SDPA.block(Y, 3), Diagonal([+4.087e-07, +3.195e-08]), rtol=1e-4)
 @test isapprox(Y[6, 6], +4.087e-07, rtol=1e-4)
 @test Y[6, 7] == 0
 

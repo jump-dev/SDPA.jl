@@ -20,9 +20,7 @@ function __init__()
     @initcxx
 end
 
-using SemidefiniteOptInterface
-SDOI = SemidefiniteOptInterface
-
+include("blockdiag.jl")
 include("blockmat.jl")
 include("options.jl")
 include("MOI_wrapper.jl")
