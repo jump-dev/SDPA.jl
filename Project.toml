@@ -1,7 +1,7 @@
 name = "SDPA"
 uuid = "b9a10b5b-afa4-512f-a053-bb3d8080febc"
 repo = "https://github.com/JuliaOpt/SDPA.jl.git"
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
