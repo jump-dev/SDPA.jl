@@ -45,7 +45,7 @@ The following table gives the default value for each parameter.
 The package is registered in `METADATA.jl` and so can be installed with `Pkg.add`.
 
 ```
-julia> import Pkg; Pkg.add("Clp")
+julia> import Pkg; Pkg.add("SDPA")
 ```
 
 SDPA.jl will use [BinaryProvider.jl](https://github.com/JuliaPackaging/BinaryProvider.jl) to automatically install the SDPA binaries for Linux and OS X. This should work for both the official Julia binaries from `https://julialang.org/downloads/` and source-builds that used `gcc` versions 7 or 8. 
