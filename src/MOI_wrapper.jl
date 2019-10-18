@@ -53,16 +53,16 @@ MOI.get(::Optimizer, ::MOI.SolverName) = "SDPA"
 # See https://www.researchgate.net/publication/247456489_SDPA_SemiDefinite_Programming_Algorithm_User's_Manual_-_Version_600
 # "SDPA (SemiDefinite Programming Algorithm) User's Manual — Version 6.00" Section 6.2
 const RAW_STATUS = Dict(
-    noINFO        => "The iteration has exceeded the maxIteration and stopped with no informationon the primal feasibility and the dual feasibility.",
-    pdOPT => "The normal termination yielding both primal and dual approximate optimal solutions.",
-    pFEAS => "The primal problem got feasible but the iteration has exceeded the maxIteration and stopped.",
-    dFEAS => "The dual problem got feasible but the iteration has exceeded the maxIteration and stopped.",
-    pdFEAS => "Both primal problem and the dual problem got feasible, but the iterationhas exceeded the maxIteration and stopped.",
-    pdINF => "At least one of the primal problem and the dual problem is expected to be infeasible.",
+    noINFO     => "The iteration has exceeded the maxIteration and stopped with no informationon the primal feasibility and the dual feasibility.",
+    pdOPT      => "The normal termination yielding both primal and dual approximate optimal solutions.",
+    pFEAS      => "The primal problem got feasible but the iteration has exceeded the maxIteration and stopped.",
+    dFEAS      => "The dual problem got feasible but the iteration has exceeded the maxIteration and stopped.",
+    pdFEAS     => "Both primal problem and the dual problem got feasible, but the iterationhas exceeded the maxIteration and stopped.",
+    pdINF      => "At least one of the primal problem and the dual problem is expected to be infeasible.",
     pFEAS_dINF => "The primal problem has become feasible but the dual problem is expected to be infeasible.",
     pINF_dFEAS => "The dual problem has become feasible but the primal problem is expected to be infeasible.",
-    pUNBD => "The primal problem is expected to be unbounded.",
-    dUNBD => "The dual problem is expected to be unbounded.")
+    pUNBD      => "The primal problem is expected to be unbounded.",
+    dUNBD      => "The dual problem is expected to be unbounded.")
 
 function MOI.get(optimizer::Optimizer, ::MOI.RawStatusString)
 	return RAW_STATUS[getPhaseValue(optimizer.problem)]
@@ -242,7 +242,7 @@ end
 function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
     status = getPhaseValue(m.problem)
     if status == noINFO
-        return MOI.OPTIMIZE_NOT_CALLED
+        return MOI.ITERATION_LIMIT
     elseif status == pFEAS
         return MOI.SLOW_PROGRESS
     elseif status == dFEAS
