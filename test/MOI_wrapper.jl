@@ -28,6 +28,8 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 
 @testset "Unit" begin
     MOIT.unittest(bridged, config, [
+        # `NumberOfThreads` not supported.
+        "number_threads",
         # `TimeLimitSec` not supported.
         "time_limit_sec",
         # SingleVariable objective of bridged variables, will be solved by objective bridges
@@ -53,9 +55,9 @@ end
 end
 @testset "Conic tests" begin
     MOIT.contconictest(bridged, config, [
-        "lin3", "soc3",
+        "lin3", "soc3", "normone2", "norminf2",
         # Missing bridges
         "rootdets",
         # Does not support power and exponential cone
-        "pow", "logdet", "exp"])
+        "pow", "dualpow", "logdet", "exp", "dualexp"])
 end

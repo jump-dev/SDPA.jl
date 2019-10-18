@@ -11,14 +11,14 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
     blockdims::Vector{Int}
     varmap::Vector{Tuple{Int, Int, Int}} # Variable Index vi -> blk, i, j
     b::Vector{Cdouble}
-    problem::SDPAProblem
+    problem::Union{Nothing, SDPAProblem}
     solve_time::Float64
     silent::Bool
     options::Dict{Symbol, Any}
     function Optimizer(; kwargs...)
 		optimizer = new(
             zero(Cdouble), 1, Int[], Tuple{Int, Int, Int}[], Cdouble[],
-            SDPAProblem(), NaN, false, Dict{Symbol, Any}())
+            nothing, NaN, false, Dict{Symbol, Any}())
 		for (key, value) in kwargs
 			MOI.set(optimizer, MOI.RawParameter(key), value)
 		end
@@ -65,6 +65,9 @@ const RAW_STATUS = Dict(
     dUNBD      => "The dual problem is expected to be unbounded.")
 
 function MOI.get(optimizer::Optimizer, ::MOI.RawStatusString)
+    if optimizer.problem === nothing
+        return "`MOI.optimize!` not called."
+    end
 	return RAW_STATUS[getPhaseValue(optimizer.problem)]
 end
 function MOI.get(optimizer::Optimizer, ::MOI.SolveTime)
@@ -84,7 +87,7 @@ function MOI.empty!(optimizer::Optimizer)
     empty!(optimizer.blockdims)
     empty!(optimizer.varmap)
     empty!(optimizer.b)
-    optimizer.problem = SDPAProblem()
+    optimizer.problem = nothing
 end
 
 function MOI.supports(
@@ -240,6 +243,9 @@ function MOI.optimize!(m::Optimizer)
 end
 
 function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
+    if m.problem === nothing
+        return MOI.OPTIMIZE_NOT_CALLED
+    end
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.ITERATION_LIMIT
@@ -264,7 +270,10 @@ function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
     end
 end
 
-function MOI.get(m::Optimizer, ::MOI.PrimalStatus)
+function MOI.get(m::Optimizer, attr::MOI.PrimalStatus)
+    if attr.N > MOI.get(m, MOI.ResultCount())
+        return MOI.NO_SOLUTION
+    end
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UNKNOWN_RESULT_STATUS
@@ -289,7 +298,10 @@ function MOI.get(m::Optimizer, ::MOI.PrimalStatus)
     end
 end
 
-function MOI.get(m::Optimizer, ::MOI.DualStatus)
+function MOI.get(m::Optimizer, attr::MOI.DualStatus)
+    if attr.N > MOI.get(m, MOI.ResultCount())
+        return MOI.NO_SOLUTION
+    end
     status = getPhaseValue(m.problem)
     if status == noINFO
         return MOI.UNKNOWN_RESULT_STATUS
@@ -314,11 +326,13 @@ function MOI.get(m::Optimizer, ::MOI.DualStatus)
     end
 end
 
-MOI.get(m::Optimizer, ::MOI.ResultCount) = 1
-function MOI.get(m::Optimizer, ::MOI.ObjectiveValue)
+MOI.get(m::Optimizer, ::MOI.ResultCount) = m.problem === nothing ? 0 : 1
+function MOI.get(m::Optimizer, attr::MOI.ObjectiveValue)
+    MOI.check_result_index_bounds(m, attr)
     return m.objsign * getPrimalObj(m.problem) + m.objconstant
 end
-function MOI.get(m::Optimizer, ::MOI.DualObjectiveValue)
+function MOI.get(m::Optimizer, attr::MOI.DualObjectiveValue)
+    MOI.check_result_index_bounds(m, attr)
     return m.objsign * getDualObj(m.problem) + m.objconstant
 end
 struct PrimalSolutionMatrix <: MOI.AbstractModelAttribute end
@@ -365,23 +379,28 @@ function vectorize_block(M::AbstractMatrix{Cdouble}, blk::Integer, s::Type{MOI.P
     return v
 end
 
-function MOI.get(optimizer::Optimizer, ::MOI.VariablePrimal, vi::MOI.VariableIndex)
+function MOI.get(optimizer::Optimizer, attr::MOI.VariablePrimal, vi::MOI.VariableIndex)
+    MOI.check_result_index_bounds(optimizer, attr)
     blk, i, j = varmap(optimizer, vi)
     return block(MOI.get(optimizer, PrimalSolutionMatrix()), blk)[i, j]
 end
 
-function MOI.get(optimizer::Optimizer, ::MOI.ConstraintPrimal,
+function MOI.get(optimizer::Optimizer, attr::MOI.ConstraintPrimal,
                  ci::MOI.ConstraintIndex{MOI.VectorOfVariables, S}) where S<:SupportedSets
+    MOI.check_result_index_bounds(optimizer, attr)
     return vectorize_block(MOI.get(optimizer, PrimalSolutionMatrix()), block(optimizer, ci), S)
 end
-function MOI.get(m::Optimizer, ::MOI.ConstraintPrimal, ci::AFFEQ)
+function MOI.get(m::Optimizer, attr::MOI.ConstraintPrimal, ci::AFFEQ)
+    MOI.check_result_index_bounds(m, attr)
     return m.b[ci.value]
 end
 
-function MOI.get(optimizer::Optimizer, ::MOI.ConstraintDual,
+function MOI.get(optimizer::Optimizer, attr::MOI.ConstraintDual,
                  ci::MOI.ConstraintIndex{MOI.VectorOfVariables, S}) where S<:SupportedSets
+    MOI.check_result_index_bounds(optimizer, attr)
     return vectorize_block(MOI.get(optimizer, DualSlackMatrix()), block(optimizer, ci), S)
 end
-function MOI.get(optimizer::Optimizer, ::MOI.ConstraintDual, ci::AFFEQ)
+function MOI.get(optimizer::Optimizer, attr::MOI.ConstraintDual, ci::AFFEQ)
+    MOI.check_result_index_bounds(optimizer, attr)
     return -MOI.get(optimizer, DualSolutionVector())[ci.value]
 end
