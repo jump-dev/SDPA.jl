@@ -23,7 +23,8 @@ julia = "1"
 
 [extras]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Compat"]
+test = ["Compat", "SparseArrays", "Test"]
