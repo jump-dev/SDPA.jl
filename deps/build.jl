@@ -59,4 +59,12 @@ if !custom_library
  end
 
 # Write out a deps.jl file that will contain mappings for our products
-write_deps_file(joinpath(@__DIR__, "deps.jl"), products, verbose=verbose)
+# With `isolate=true`, I get:
+# $ /home/blegat/packages/julias/julia-1.4-latest/bin/julia -Cnative -J/home/blegat/packages/julias/julia-1.4-latest/lib/julia/sys.so -O0 -g1 --startup-file=no -e 'import Libdl; Libdl.dlopen("/home/blegat/.julia/dev/SDPA/deps/usr/lib/libsdpawrap.so")'
+# ERROR: could not load library "/home/blegat/.julia/dev/SDPA/deps/usr/lib/libsdpawrap.so"
+# libcxxwrap_julia.so.0: cannot open shared object file: No such file or directory
+# Stacktrace:
+#  [1] dlopen(::String, ::UInt32; throw_error::Bool) at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.4/Libdl/src/Libdl.jl:109
+#  [2] dlopen at /buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v1.4/Libdl/src/Libdl.jl:109 [inlined] (repeats 2 times)
+#  [3] top-level scope at none:1
+write_deps_file(joinpath(@__DIR__, "deps.jl"), products, verbose=verbose, isolate=false)
