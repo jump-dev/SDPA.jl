@@ -2,8 +2,7 @@ using BinaryProvider # requires BinaryProvider 0.5.3 or later
 using CxxWrap
 
 # Parse some basic command-line arguments
-#const verbose = "--verbose" in ARGS
-const verbose = true
+const verbose = "--verbose" in ARGS
 const prefix = Prefix(get([a for a in ARGS if a != "--verbose"], 1, joinpath(@__DIR__, "usr")))
 products = [
     ExecutableProduct(prefix, "sdpa", :sdpa),
