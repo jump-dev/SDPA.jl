@@ -1,6 +1,6 @@
 name = "SDPA"
 uuid = "b9a10b5b-afa4-512f-a053-bb3d8080febc"
-repo = "https://github.com/JuliaOpt/SDPA.jl.git"
+repo = "https://github.com/jump-dev/SDPA.jl.git"
 version = "0.2.2"
 
 [deps]
