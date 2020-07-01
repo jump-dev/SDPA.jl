@@ -6,7 +6,7 @@
 | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
 Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver.
-Write `SDPASolver()` to use this solver with [JuMP](github.com/JuliaOpt/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
+Write `SDPASolver()` to use this solver with [JuMP](github.com/jump-dev/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
 
 ## Parameters
 
@@ -23,7 +23,7 @@ The three modes are as follow:
 To set the SDPA solver in a mode you do, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST)`.
 Note that the parameters are set in the order they are given so you can set it in a mode and then modify one parameter from this mode, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST, MaxIteration=1000)`.
 
-Note that `PARAMETER_UNSTABLE_BUT_FAST` appears to be the most reliable of the three modes, at least in some cases; e.g. it gives the fewest failures on Convex.jl's tests (see [#17](https://github.com/JuliaOpt/SDPA.jl/issues/17#issuecomment-502045684)).
+Note that `PARAMETER_UNSTABLE_BUT_FAST` appears to be the most reliable of the three modes, at least in some cases; e.g. it gives the fewest failures on Convex.jl's tests (see [#17](https://github.com/jump-dev/SDPA.jl/issues/17#issuecomment-502045684)).
 
 The following table gives the default value for each parameter.
 
@@ -72,12 +72,12 @@ If you do not want BinaryProvider to download the default binaries on install, s
 To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`.
 
 
-[build-img]: https://travis-ci.org/JuliaOpt/SDPA.jl.svg?branch=master
-[build-url]: https://travis-ci.org/JuliaOpt/SDPA.jl
+[build-img]: https://travis-ci.org/jump-dev/SDPA.jl.svg?branch=master
+[build-url]: https://travis-ci.org/jump-dev/SDPA.jl
 [coveralls-img]: https://coveralls.io/repos/blegat/SDPA.jl/badge.svg?branch=master&service=github
 [coveralls-url]: https://coveralls.io/github/blegat/SDPA.jl?branch=master
-[codecov-img]: http://codecov.io/github/JuliaOpt/SDPA.jl/coverage.svg?branch=master
-[codecov-url]: http://codecov.io/github/JuliaOpt/SDPA.jl?branch=master
+[codecov-img]: http://codecov.io/github/jump-dev/SDPA.jl/coverage.svg?branch=master
+[codecov-url]: http://codecov.io/github/jump-dev/SDPA.jl?branch=master
 
 [zenodo-url]: https://doi.org/10.5281/zenodo.1285668
 [zenodo-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.1285668.svg
