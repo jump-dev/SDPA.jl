@@ -5,8 +5,9 @@
 | [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
 | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
-Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver.
-Write `SDPASolver()` to use this solver with [JuMP](github.com/jump-dev/JuMP.jl), [Convex](https://github.com/JuliaOpt/Convex.jl) or any other package using the [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl) interface.
+Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver in double precision floating point arithmetics (i.e. `Float64`);
+see [SDPAFamily](https://github.com/ericphanson/SDPAFamily.jl) for the other solvers SDPA-GMP, SDPA-DD, and SDPA-QD of the family.
+Write `SDPA.Optimizer` to use this solver with [JuMP](github.com/jump-dev/JuMP.jl), [Convex](https://github.com/jump-dev/Convex.jl) or any other package using the [MathOptInterface](https://github.com/jump-dev/MathOptInterface.jl) interface.
 
 ## Parameters
 
@@ -48,9 +49,9 @@ The package is registered in `METADATA.jl` and so can be installed with `Pkg.add
 julia> import Pkg; Pkg.add("SDPA")
 ```
 
-SDPA.jl will use [BinaryProvider.jl](https://github.com/JuliaPackaging/BinaryProvider.jl) to automatically install the SDPA binaries for Linux and OS X. This should work for both the official Julia binaries from `https://julialang.org/downloads/` and source-builds that used `gcc` versions 7 or 8. 
+SDPA.jl will use [BinaryProvider.jl](https://github.com/JuliaPackaging/BinaryProvider.jl) to automatically install the SDPA binaries for Linux and OS X. This should work for both the official Julia binaries from `https://julialang.org/downloads/` and source-builds that used `gcc` versions 7 or 8.
 
-*NOTE:* If you see an error similar to 
+*NOTE:* If you see an error similar to
 ```julia
 INFO: Precompiling module GZip.
 ERROR: LoadError: LoadError: error compiling anonymous: could not load library "libz"
