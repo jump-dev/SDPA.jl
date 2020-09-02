@@ -10,16 +10,17 @@ Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 MathProgBase = "fdba3010-5040-5b88-9595-932c9decdf73"
+SDPA_jll = "7fc90fd6-dbef-5a6a-93f8-169f2a2e705b"
 SemidefiniteModels = "169818f4-1a3d-53bf-95b3-11177825b1e3"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 BinaryProvider = "0.5.9"
-CxxWrap = "= 0.8.1"
+CxxWrap = "0.11"
 MathOptInterface = "0.9.5"
 MathProgBase = "0.7"
 SemidefiniteModels = "~0.1.1"
-julia = "1"
+julia = "1.5"
 
 [extras]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"

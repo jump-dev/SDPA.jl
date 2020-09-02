@@ -97,7 +97,7 @@ function MPB.getsolution(m::SDPAMathProgModel)
     PrimalSolution(m.problem)
 end
 function MPB.getdual(m::SDPAMathProgModel)
-    unsafe_wrap(Array, getResultXVec(m.problem), getConstraintNumber(m.problem))
+    unsafe_wrap(Array, getResultXVec(m.problem).cpp_object, getConstraintNumber(m.problem))
 end
 function MPB.getvardual(m::SDPAMathProgModel)
     VarDualSolution(m.problem)
