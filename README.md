@@ -3,7 +3,7 @@
 | **Build Status** | **References to cite** |
 |:----------------:|:----------------------:|
 | [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
-| [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
+| [![Codecov branch][codecov-img]][codecov-url] | |
 
 Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver in double precision floating point arithmetics (i.e. `Float64`);
 see [SDPAFamily](https://github.com/ericphanson/SDPAFamily.jl) for the other solvers SDPA-GMP, SDPA-DD, and SDPA-QD of the family.
@@ -75,8 +75,6 @@ To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call 
 
 [build-img]: https://travis-ci.org/jump-dev/SDPA.jl.svg?branch=master
 [build-url]: https://travis-ci.org/jump-dev/SDPA.jl
-[coveralls-img]: https://coveralls.io/repos/blegat/SDPA.jl/badge.svg?branch=master&service=github
-[coveralls-url]: https://coveralls.io/github/blegat/SDPA.jl?branch=master
 [codecov-img]: http://codecov.io/github/jump-dev/SDPA.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/jump-dev/SDPA.jl?branch=master
 

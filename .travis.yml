@@ -1,5 +1,4 @@
 language: julia
-coveralls: true
 codecov: true
 os:
   - linux
