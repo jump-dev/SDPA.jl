@@ -6,20 +6,8 @@ using CxxWrap
 # dependencies (Libdl is used by BinaryProvider), e.g.: bicycle1885/CodecZlib.jl#26.
 using Libdl
 
-if VERSION < v"1.3"
-    const depsfile = joinpath(dirname(dirname(@__FILE__)), "deps", "deps.jl")
-    if isfile(depsfile)
-        include(depsfile)
-    else
-        error("SDPA not properly installed. Please run Pkg.build(\"SDPA\")")
-    end
-
-    @wrapmodule(joinpath(dirname(dirname(pathof(SDPA))), "deps", "usr", "lib",
-                         "libsdpawrap"))
-else
-    import SDPA_jll: libsdpawrap_path, libsdpawrap
-    @wrapmodule(libsdpawrap_path)
-end
+import SDPA_jll: libsdpawrap_path, libsdpawrap
+@wrapmodule(libsdpawrap_path)
 
 function __init__()
     @initcxx
@@ -29,6 +17,5 @@ include("blockdiag.jl")
 include("blockmat.jl")
 include("options.jl")
 include("MOI_wrapper.jl")
-include("MPB_wrapper.jl")
 
 end # module
