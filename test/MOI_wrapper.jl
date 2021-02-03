@@ -49,6 +49,8 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_zero_one_with_bounds_2",
         "solve_zero_one_with_bounds_3",
         # FarkasDual tests: SDPA doesn't like proving infeasibility for these...
+        # Expression: MOI.get(model, MOI.TerminationStatus()) == MOI.INFEASIBLE
+        #  Evaluated: MathOptInterface.INFEASIBLE_OR_UNBOUNDED == MathOptInterface.INFEASIBLE
         "solve_farkas_equalto_upper",
         "solve_farkas_equalto_lower",
         "solve_farkas_lessthan",
