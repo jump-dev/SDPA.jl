@@ -28,16 +28,23 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
 
 @testset "Unit" begin
     MOIT.unittest(bridged, config, [
+        # TODO(odow): FIX THIS
+        "solve_twice",
         # `NumberOfThreads` not supported.
         "number_threads",
         # `TimeLimitSec` not supported.
         "time_limit_sec",
         # SingleVariable objective of bridged variables, will be solved by objective bridges
-        "solve_time", "raw_status_string", "solve_singlevariable_obj",
+        "solve_time",
+        "raw_status_string",
+        "solve_singlevariable_obj",
         # Quadratic functions are not supported
-        "solve_qcp_edge_cases", "solve_qp_edge_cases",
+        "solve_qcp_edge_cases",
+        "solve_qp_edge_cases",
+        "solve_qp_zero_offdiag",
         # Integer and ZeroOne sets are not supported
-        "solve_integer_edge_cases", "solve_objbound_edge_cases",
+        "solve_integer_edge_cases",
+        "solve_objbound_edge_cases",
         "solve_zero_one_with_bounds_1",
         "solve_zero_one_with_bounds_2",
         "solve_zero_one_with_bounds_3",
@@ -50,9 +57,9 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_farkas_interval_upper",
         "solve_farkas_variable_lessthan",
         "solve_farkas_variable_lessthan_max",
-
     ])
 end
+
 @testset "Linear tests" begin
     # See explanation in `MOI/test/Bridges/lazy_bridge_optimizer.jl`.
     # This is to avoid `Variable.VectorizeBridge` which does not support
