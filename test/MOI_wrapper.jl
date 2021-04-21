@@ -40,7 +40,17 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_integer_edge_cases", "solve_objbound_edge_cases",
         "solve_zero_one_with_bounds_1",
         "solve_zero_one_with_bounds_2",
-        "solve_zero_one_with_bounds_3"])
+        "solve_zero_one_with_bounds_3",
+        # FarkasDual tests: SDPA doesn't like proving infeasibility for these...
+        "solve_farkas_equalto_upper",
+        "solve_farkas_equalto_lower",
+        "solve_farkas_lessthan",
+        "solve_farkas_greaterthan",
+        "solve_farkas_interval_lower",
+        "solve_farkas_variable_lessthan",
+        "solve_farkas_variable_lessthan_max",
+
+    ])
 end
 @testset "Linear tests" begin
     # See explanation in `MOI/test/Bridges/lazy_bridge_optimizer.jl`.
