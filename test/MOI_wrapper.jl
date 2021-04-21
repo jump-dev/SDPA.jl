@@ -47,6 +47,7 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_farkas_lessthan",
         "solve_farkas_greaterthan",
         "solve_farkas_interval_lower",
+        "solve_farkas_interval_upper",
         "solve_farkas_variable_lessthan",
         "solve_farkas_variable_lessthan_max",
 
