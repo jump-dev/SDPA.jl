@@ -72,8 +72,8 @@ If you do not want BinaryProvider to download the default binaries on install, s
 
 To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`.
 
-[build-img]: https://github.com/jump-dev/Clp.jl/workflows/CI/badge.svg?branch=master
-[build-url]: https://github.com/jump-dev/Clp.jl/actions?query=workflow%3ACI
+[build-img]: https://github.com/jump-dev/SDPA.jl/workflows/CI/badge.svg?branch=master
+[build-url]: https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI
 [codecov-img]: http://codecov.io/github/jump-dev/SDPA.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/jump-dev/SDPA.jl?branch=master
 
