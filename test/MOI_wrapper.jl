@@ -2,7 +2,7 @@ using Test
 
 using MathOptInterface
 const MOI = MathOptInterface
-const MOIT = MOI.Test
+const MOIT = MOI.DeprecatedTest
 const MOIU = MOI.Utilities
 const MOIB = MOI.Bridges
 
@@ -14,17 +14,12 @@ MOI.set(optimizer, MOI.Silent(), true)
     @test MOI.get(optimizer, MOI.SolverName()) == "SDPA"
 end
 
-@testset "supports_default_copy_to" begin
-    @test MOIU.supports_allocate_load(optimizer, false)
-    @test !MOIU.supports_allocate_load(optimizer, true)
-end
-
 # UniversalFallback is needed for starting values, even if they are ignored by SDPA
 const cache = MOIU.UniversalFallback(MOIU.Model{Float64}())
 const cached = MOIU.CachingOptimizer(cache, optimizer)
 const bridged = MOIB.full_bridge_optimizer(cached, Float64)
 # test 1e-3 because of rsoc3 test, otherwise, 1e-5 is enough
-const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
+const config = MOIT.Config(atol=1e-3, rtol=1e-3)
 
 @testset "Unit" begin
     MOIT.unittest(bridged, config, [
@@ -59,6 +54,7 @@ const config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
         "solve_farkas_interval_upper",
         "solve_farkas_variable_lessthan",
         "solve_farkas_variable_lessthan_max",
+        "solve_start_soc", # RSOCtoPSDBridge seems to be incorrect for dimension-2 RSOC cone.
     ])
 end
 
