@@ -1,13 +1,14 @@
 export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 
 using MathOptInterface
-MOI = MathOptInterface
-const MOIU = MOI.Utilities
-const AFFEQ = MOI.ConstraintIndex{MOI.ScalarAffineFunction{Cdouble}, MOI.EqualTo{Cdouble}}
+const MOI = MathOptInterface
+const AFF = MOI.ScalarAffineFunction{Cdouble}
+const EQ = MOI.EqualTo{Cdouble}
+const AFFEQ = MOI.ConstraintIndex{AFF,EQ}
 
 mutable struct Optimizer <: MOI.AbstractOptimizer
-    objconstant::Cdouble
-    objsign::Int
+    objective_constant::Cdouble
+    objective_sign::Int
     blockdims::Vector{Int}
     varmap::Vector{Tuple{Int, Int, Int}} # Variable Index vi -> blk, i, j
     b::Vector{Cdouble}
@@ -20,7 +21,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
             zero(Cdouble), 1, Int[], Tuple{Int, Int, Int}[], Cdouble[],
             nothing, NaN, false, Dict{Symbol, Any}())
 		for (key, value) in kwargs
-			MOI.set(optimizer, MOI.RawParameter(key), value)
+			MOI.set(optimizer, MOI.RawOptimizerAttribute(key), value)
 		end
 		return optimizer
     end
@@ -28,16 +29,16 @@ end
 
 varmap(optimizer::Optimizer, vi::MOI.VariableIndex) = optimizer.varmap[vi.value]
 
-function MOI.supports(optimizer::Optimizer, param::MOI.RawParameter)
+function MOI.supports(optimizer::Optimizer, param::MOI.RawOptimizerAttribute)
 	return param.name in keys(SET_PARAM)
 end
-function MOI.set(optimizer::Optimizer, param::MOI.RawParameter, value)
+function MOI.set(optimizer::Optimizer, param::MOI.RawOptimizerAttribute, value)
 	if !MOI.supports(optimizer, param)
 		throw(MOI.UnsupportedAttribute(param))
 	end
 	optimizer.options[param.name] = value
 end
-function MOI.get(optimizer::Optimizer, param::MOI.RawParameter)
+function MOI.get(optimizer::Optimizer, param::MOI.RawOptimizerAttribute)
 	# TODO: This gives a poor error message if the name of the parameter is invalid.
 	return optimizer.options[param.name]
 end
@@ -73,20 +74,20 @@ function MOI.get(optimizer::Optimizer, ::MOI.RawStatusString)
     end
 	return RAW_STATUS[getPhaseValue(optimizer.problem)]
 end
-function MOI.get(optimizer::Optimizer, ::MOI.SolveTime)
+function MOI.get(optimizer::Optimizer, ::MOI.SolveTimeSec)
 	return optimizer.solve_time
 end
 
 function MOI.is_empty(optimizer::Optimizer)
-    return iszero(optimizer.objconstant) &&
-        optimizer.objsign == 1 &&
+    return iszero(optimizer.objective_constant) &&
+        optimizer.objective_sign == 1 &&
         isempty(optimizer.blockdims) &&
         isempty(optimizer.varmap) &&
         isempty(optimizer.b)
 end
 function MOI.empty!(optimizer::Optimizer)
-    optimizer.objconstant = zero(Cdouble)
-    optimizer.objsign = 1
+    optimizer.objective_constant = zero(Cdouble)
+    optimizer.objective_sign = 1
     empty!(optimizer.blockdims)
     empty!(optimizer.varmap)
     empty!(optimizer.b)
@@ -96,7 +97,7 @@ end
 function MOI.supports(
     optimizer::Optimizer,
     ::Union{MOI.ObjectiveSense,
-            MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}}})
+            MOI.ObjectiveFunction{AFF}})
     return true
 end
 
@@ -105,44 +106,12 @@ MOI.supports_add_constrained_variables(::Optimizer, ::Type{MOI.Reals}) = false
 const SupportedSets = Union{MOI.Nonnegatives, MOI.PositiveSemidefiniteConeTriangle}
 MOI.supports_add_constrained_variables(::Optimizer, ::Type{<:SupportedSets}) = true
 function MOI.supports_constraint(
-    ::Optimizer, ::Type{MOI.ScalarAffineFunction{Cdouble}},
-    ::Type{MOI.EqualTo{Cdouble}})
+    ::Optimizer, ::Type{AFF},
+    ::Type{EQ})
     return true
 end
 
-function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike; kws...)
-    return MOIU.automatic_copy_to(dest, src; kws...)
-end
-MOIU.supports_allocate_load(::Optimizer, copy_names::Bool) = !copy_names
-
-function MOIU.allocate(optimizer::Optimizer, ::MOI.ObjectiveSense, sense::MOI.OptimizationSense)
-    # To be sure that it is done before load(optimizer, ::ObjectiveFunction, ...), we do it in allocate
-    optimizer.objsign = sense == MOI.MIN_SENSE ? -1 : 1
-end
-function MOIU.allocate(::Optimizer, ::MOI.ObjectiveFunction, ::MOI.ScalarAffineFunction) end
-
-function MOIU.load(::Optimizer, ::MOI.ObjectiveSense, ::MOI.OptimizationSense) end
-# Loads objective coefficient α * vi
-function load_objective_term!(optimizer::Optimizer, α, vi::MOI.VariableIndex)
-    blk, i, j = varmap(optimizer, vi)
-    coef = optimizer.objsign * α
-    if i != j
-        coef /= 2
-    end
-    # in SDP format, it is max and in MPB Conic format it is min
-    inputElement(optimizer.problem, 0, blk, i, j, float(coef), false)
-end
-function MOIU.load(optimizer::Optimizer, ::MOI.ObjectiveFunction, f::MOI.ScalarAffineFunction)
-    obj = MOIU.canonical(f)
-    optimizer.objconstant = f.constant
-    for t in obj.terms
-        if !iszero(t.coefficient)
-            load_objective_term!(optimizer, t.coefficient, t.variable_index)
-        end
-    end
-end
-
-function new_block(optimizer::Optimizer, set::MOI.Nonnegatives)
+function _new_block(optimizer::Optimizer, set::MOI.Nonnegatives)
     push!(optimizer.blockdims, -MOI.dimension(set))
     blk = length(optimizer.blockdims)
     for i in 1:MOI.dimension(set)
@@ -150,7 +119,7 @@ function new_block(optimizer::Optimizer, set::MOI.Nonnegatives)
     end
 end
 
-function new_block(optimizer::Optimizer, set::MOI.PositiveSemidefiniteConeTriangle)
+function _new_block(optimizer::Optimizer, set::MOI.PositiveSemidefiniteConeTriangle)
     push!(optimizer.blockdims, set.side_dimension)
     blk = length(optimizer.blockdims)
     for i in 1:set.side_dimension
@@ -160,71 +129,157 @@ function new_block(optimizer::Optimizer, set::MOI.PositiveSemidefiniteConeTriang
     end
 end
 
-function MOIU.allocate_constrained_variables(optimizer::Optimizer,
+function _add_constrained_variables(optimizer::Optimizer,
                                              set::SupportedSets)
     offset = length(optimizer.varmap)
-    new_block(optimizer, set)
+    _new_block(optimizer, set)
     ci = MOI.ConstraintIndex{MOI.VectorOfVariables, typeof(set)}(offset + 1)
     return [MOI.VariableIndex(i) for i in offset .+ (1:MOI.dimension(set))], ci
 end
 
-function MOIU.load_constrained_variables(
-    optimizer::Optimizer, vis::Vector{MOI.VariableIndex},
-    ci::MOI.ConstraintIndex{MOI.VectorOfVariables},
-    set::SupportedSets)
+function _error(start, stop)
+    error(start, ". Use `MOI.instantiate(SDPA.Optimizer, with_bridge_type = Float64)` ", stop)
 end
 
-function MOIU.load_variables(optimizer::Optimizer, nvars)
-    @assert nvars == length(optimizer.varmap)
-    dummy = isempty(optimizer.b)
-    if dummy
-        optimizer.b = [one(Cdouble)]
-        optimizer.blockdims = [optimizer.blockdims; -1]
-    end
-    optimizer.problem = SDPAProblem()
-    setParameterType(optimizer.problem, PARAMETER_DEFAULT)
-	# TODO Take `silent` into account here
-    setparameters!(optimizer.problem, optimizer.options)
-    inputConstraintNumber(optimizer.problem, length(optimizer.b))
-    inputBlockNumber(optimizer.problem, length(optimizer.blockdims))
-    for (i, blkdim) in enumerate(optimizer.blockdims)
-        inputBlockSize(optimizer.problem, i, blkdim)
-        inputBlockType(optimizer.problem, i, blkdim < 0 ? LP : SDP)
-    end
-    initializeUpperTriangleSpace(optimizer.problem)
-    for i in eachindex(optimizer.b)
-        inputCVec(optimizer.problem, i, optimizer.b[i])
-    end
-    if dummy
-        inputElement(optimizer.problem, 1, length(optimizer.blockdims), 1, 1, one(Cdouble), false)
-    end
-end
-
-function MOIU.allocate_constraint(optimizer::Optimizer,
-                                  func::MOI.ScalarAffineFunction{Cdouble},
-                                  set::MOI.EqualTo{Cdouble})
-    push!(optimizer.b, MOI.constant(set))
-    return AFFEQ(length(optimizer.b))
-end
-
-function MOIU.load_constraint(m::Optimizer, ci::AFFEQ,
-                              f::MOI.ScalarAffineFunction, s::MOI.EqualTo)
-    if !iszero(MOI.constant(f))
-        throw(MOI.ScalarFunctionConstantNotZero{
-            Cdouble, MOI.ScalarAffineFunction{Cdouble}, MOI.EqualTo{Cdouble}}(
-                MOI.constant(f)))
-    end
-    f = MOIU.canonical(f) # sum terms with same variables and same outputindex
-    for t in f.terms
-        if !iszero(t.coefficient)
-            blk, i, j = varmap(m, t.variable_index)
-            coef = t.coefficient
-            if i != j
-                coef /= 2
+function constrain_variables_on_creation(
+    dest::MOI.ModelLike,
+    src::MOI.ModelLike,
+    index_map::MOI.Utilities.IndexMap,
+    ::Type{S},
+) where {S<:MOI.AbstractVectorSet}
+    for ci_src in
+        MOI.get(src, MOI.ListOfConstraintIndices{MOI.VectorOfVariables,S}())
+        f_src = MOI.get(src, MOI.ConstraintFunction(), ci_src)
+        if !allunique(f_src.variables)
+            _error("Cannot copy constraint `$(ci_src)` as variables constrained on creation because there are duplicate variables in the function `$(f_src)`",
+                   "to bridge this by creating slack variables.")
+        elseif any(vi -> haskey(index_map, vi), f_src.variables)
+            _error("Cannot copy constraint `$(ci_src)` as variables constrained on creation because some variables of the function `$(f_src)` are in another constraint as well.",
+                   "to bridge constraints having the same variables by creating slack variables.")
+        else
+            set = MOI.get(src, MOI.ConstraintSet(), ci_src)::S
+            vis_dest, ci_dest = _add_constrained_variables(dest, set)
+            index_map[ci_src] = ci_dest
+            for (vi_src, vi_dest) in zip(f_src.variables, vis_dest)
+                index_map[vi_src] = vi_dest
             end
-            inputElement(m.problem, ci.value, blk, i, j, float(coef), false)
         end
     end
+end
+
+# Loads objective coefficient α * vi
+function load_objective_term!(optimizer::Optimizer, α, vi::MOI.VariableIndex)
+    blk, i, j = varmap(optimizer, vi)
+    coef = optimizer.objective_sign * α
+    if i != j
+        coef /= 2
+    end
+    # in SDP format, it is max and in MPB Conic format it is min
+    inputElement(optimizer.problem, 0, blk, i, j, float(coef), false)
+end
+
+function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
+    MOI.empty!(dest)
+    index_map = MOI.Utilities.IndexMap()
+
+    # Step 1) Compute the dimensions of what needs to be allocated
+    constrain_variables_on_creation(
+        dest,
+        src,
+        index_map,
+        MOI.Nonnegatives,
+    )
+    constrain_variables_on_creation(
+        dest,
+        src,
+        index_map,
+        MOI.PositiveSemidefiniteConeTriangle,
+    )
+    vis_src = MOI.get(src, MOI.ListOfVariableIndices())
+    if length(vis_src) != length(index_map.var_map)
+        _error("Free variables are not supported by SDPA",
+               "to bridge free variables into `x - y` where `x` and `y` are nonnegative.")
+    end
+    cis_src = MOI.get(src, MOI.ListOfConstraintIndices{AFF,EQ}())
+    dest.b = Vector{Cdouble}(undef, length(cis_src))
+    funcs = Vector{AFF}(undef, length(cis_src))
+    for (k, ci_src) in enumerate(cis_src)
+        funcs[k] = MOI.get(src, MOI.CanonicalConstraintFunction(), ci_src)
+        set = MOI.get(src, MOI.ConstraintSet(), ci_src)
+        if !iszero(MOI.constant(funcs[k]))
+            throw(MOI.ScalarFunctionConstantNotZero{
+                Cdouble, AFF, EQ}(
+                    MOI.constant(funcs[k])))
+        end
+        dest.b[k] = MOI.constant(set)
+        index_map[ci_src] = AFFEQ(k)
+    end
+
+    # Step 2) Allocate SDPA datastructures
+    dummy = isempty(dest.b)
+    if dummy
+        dest.b = [one(Cdouble)]
+        dest.blockdims = [dest.blockdims; -1]
+    end
+    dest.problem = SDPAProblem()
+    setParameterType(dest.problem, PARAMETER_DEFAULT)
+	# TODO Take `silent` into account here
+    setparameters!(dest.problem, dest.options)
+    inputConstraintNumber(dest.problem, length(dest.b))
+    inputBlockNumber(dest.problem, length(dest.blockdims))
+    for (i, blkdim) in enumerate(dest.blockdims)
+        inputBlockSize(dest.problem, i, blkdim)
+        inputBlockType(dest.problem, i, blkdim < 0 ? LP : SDP)
+    end
+    initializeUpperTriangleSpace(dest.problem)
+    for i in eachindex(dest.b)
+        inputCVec(dest.problem, i, dest.b[i])
+    end
+    if dummy
+        inputElement(dest.problem, 1, length(dest.blockdims), 1, 1, one(Cdouble), false)
+    end
+
+    # Step 3) Load data in the datastructures
+    for k in eachindex(funcs)
+        for term in funcs[k].terms
+            if !iszero(term.coefficient)
+                blk, i, j = varmap(dest, index_map[term.variable])
+                coef = term.coefficient
+                if i != j
+                    coef /= 2
+                end
+                inputElement(dest.problem, k, blk, i, j, float(coef), false)
+            end
+        end
+    end
+
+    MOI.Utilities.pass_attributes(dest, src, index_map, vis_src)
+    # Throw error for constraint attributes
+    MOI.Utilities.pass_attributes(dest, src, index_map, cis_src)
+
+    # Pass objective attributes and throw error for other ones
+    model_attributes = MOI.get(src, MOI.ListOfModelAttributesSet())
+    for attr in model_attributes
+        if attr != MOI.ObjectiveSense() && attr != MOI.ObjectiveFunction{AFF}()
+            throw(MOI.UnsupportedAttribute(attr))
+        end
+    end
+    # We make sure to set `objective_sign` first before setting the objective
+    if MOI.ObjectiveSense() in model_attributes
+        sense = MOI.get(src, MOI.ObjectiveSense())
+        dest.objective_sign = sense == MOI.MIN_SENSE ? -1 : 1
+    end
+    if MOI.ObjectiveFunction{AFF}() in model_attributes
+        func = MOI.get(src, MOI.ObjectiveFunction{AFF}())
+        obj = MOI.Utilities.canonical(func)
+        dest.objective_constant = obj.constant
+        for term in obj.terms
+            if !iszero(term.coefficient)
+                load_objective_term!(dest, term.coefficient, index_map[term.variable])
+            end
+        end
+    end
+    return index_map
 end
 
 function MOI.optimize!(m::Optimizer)
@@ -264,7 +319,7 @@ function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
 end
 
 function MOI.get(m::Optimizer, attr::MOI.PrimalStatus)
-    if attr.N > MOI.get(m, MOI.ResultCount())
+    if attr.result_index > MOI.get(m, MOI.ResultCount())
         return MOI.NO_SOLUTION
     end
     status = getPhaseValue(m.problem)
@@ -292,7 +347,7 @@ function MOI.get(m::Optimizer, attr::MOI.PrimalStatus)
 end
 
 function MOI.get(m::Optimizer, attr::MOI.DualStatus)
-    if attr.N > MOI.get(m, MOI.ResultCount())
+    if attr.result_index > MOI.get(m, MOI.ResultCount())
         return MOI.NO_SOLUTION
     end
     status = getPhaseValue(m.problem)
@@ -322,11 +377,11 @@ end
 MOI.get(m::Optimizer, ::MOI.ResultCount) = m.problem === nothing ? 0 : 1
 function MOI.get(m::Optimizer, attr::MOI.ObjectiveValue)
     MOI.check_result_index_bounds(m, attr)
-    return m.objsign * getPrimalObj(m.problem) + m.objconstant
+    return m.objective_sign * getPrimalObj(m.problem) + m.objective_constant
 end
 function MOI.get(m::Optimizer, attr::MOI.DualObjectiveValue)
     MOI.check_result_index_bounds(m, attr)
-    return m.objsign * getDualObj(m.problem) + m.objconstant
+    return m.objective_sign * getDualObj(m.problem) + m.objective_constant
 end
 struct PrimalSolutionMatrix <: MOI.AbstractModelAttribute end
 MOI.is_set_by_optimize(::PrimalSolutionMatrix) = true
