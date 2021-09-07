@@ -137,6 +137,10 @@ function _add_constrained_variables(optimizer::Optimizer,
     return [MOI.VariableIndex(i) for i in offset .+ (1:MOI.dimension(set))], ci
 end
 
+function _error(start, stop)
+    error(start, ". Use `MOI.instantiate(SDPA.Optimizer, with_bridge_type = Float64)` ", stop)
+end
+
 function constrain_variables_on_creation(
     dest::MOI.ModelLike,
     src::MOI.ModelLike,
@@ -147,9 +151,11 @@ function constrain_variables_on_creation(
         MOI.get(src, MOI.ListOfConstraintIndices{MOI.VectorOfVariables,S}())
         f_src = MOI.get(src, MOI.ConstraintFunction(), ci_src)
         if !allunique(f_src.variables)
-            error("Cannot copy constraint `$(ci_src)` because there are duplicate variables in the function `$(f_src)`.")
+            _error("Cannot copy constraint `$(ci_src)` as variables constrained on creation because there are duplicate variables in the function `$(f_src)`",
+                   "to bridge this by creating slack variables.")
         elseif any(vi -> haskey(index_map, vi), f_src.variables)
-            error("Cannot copy constraint `$(ci_src)` because there are duplicate variables in the function `$(f_src)`.")
+            _error("Cannot copy constraint `$(ci_src)` as variables constrained on creation because some variables of the function `$(f_src)` are in another constraint as well.",
+                   "to bridge constraints having the same variables by creating slack variables.")
         else
             set = MOI.get(src, MOI.ConstraintSet(), ci_src)::S
             vis_dest, ci_dest = _add_constrained_variables(dest, set)
@@ -190,8 +196,9 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
         MOI.PositiveSemidefiniteConeTriangle,
     )
     vis_src = MOI.get(src, MOI.ListOfVariableIndices())
-    if length(vis_src) < length(index_map.var_map)
-        error("Free variables are not supported by SDPA.")
+    if length(vis_src) != length(index_map.var_map)
+        _error("Free variables are not supported by SDPA",
+               "to bridge free variables into `x - y` where `x` and `y` are nonnegative.")
     end
     cis_src = MOI.get(src, MOI.ListOfConstraintIndices{AFF,EQ}())
     dest.b = Vector{Cdouble}(undef, length(cis_src))
@@ -241,8 +248,6 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
                 if i != j
                     coef /= 2
                 end
-                @assert 1 <= i <= abs(dest.blockdims[blk])
-                @assert 1 <= j <= abs(dest.blockdims[blk])
                 inputElement(dest.problem, k, blk, i, j, float(coef), false)
             end
         end
