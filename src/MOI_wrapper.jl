@@ -13,13 +13,14 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
     varmap::Vector{Tuple{Int, Int, Int}} # Variable Index vi -> blk, i, j
     b::Vector{Cdouble}
     problem::Union{Nothing, SDPAProblem}
+    optimized::Bool
     solve_time::Float64
     silent::Bool
     options::Dict{Symbol, Any}
     function Optimizer(; kwargs...)
 		optimizer = new(
             zero(Cdouble), 1, Int[], Tuple{Int, Int, Int}[], Cdouble[],
-            nothing, NaN, false, Dict{Symbol, Any}())
+            nothing, false, NaN, false, Dict{Symbol, Any}())
         if !isempty(kwargs)
             @warn("""Passing optimizer attributes as keyword arguments to
             SDPA.Optimizer is deprecated. Use
@@ -101,6 +102,7 @@ function MOI.empty!(optimizer::Optimizer)
     empty!(optimizer.varmap)
     empty!(optimizer.b)
     optimizer.problem = nothing
+    optimizer.optimized = false
 end
 
 function MOI.supports(
@@ -292,11 +294,15 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
 end
 
 function MOI.optimize!(m::Optimizer)
-	start_time = time()
-    SDPA.initializeUpperTriangle(m.problem, false)
-    SDPA.initializeSolve(m.problem)
-    SDPA.solve(m.problem)
-    m.solve_time = time() - start_time
+    # SDPA segfault if `optimize!` is called twice
+    if !m.optimized
+        start_time = time()
+        SDPA.initializeUpperTriangle(m.problem, false)
+        SDPA.initializeSolve(m.problem)
+        SDPA.solve(m.problem)
+        m.solve_time = time() - start_time
+        m.optimized = true
+    end
 end
 
 function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
