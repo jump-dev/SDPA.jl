@@ -43,13 +43,13 @@ The following table gives the default value for each parameter.
 
 ## Installation
 
-The package is registered in `METADATA.jl` and so can be installed with `Pkg.add`.
-
+Install SDPA using `Pkg.add`:
+```julia
+import Pkg; Pkg.add("SDPA")
 ```
-julia> import Pkg; Pkg.add("SDPA")
-```
 
-SDPA.jl will use [BinaryProvider.jl](https://github.com/JuliaPackaging/BinaryProvider.jl) to automatically install the SDPA binaries for Linux and OS X. This should work for both the official Julia binaries from `https://julialang.org/downloads/` and source-builds that used `gcc` versions 7 or 8.
+In addition to installing the SDPA.jl package, this will also download and
+install the SDPA binaries. (You do not need to install SDPA separately.)
 
 *NOTE:* If you see an error similar to
 ```julia
@@ -60,17 +60,6 @@ please see [GZip.jl#54](https://github.com/JuliaIO/GZip.jl/issues/54) or [Flux.j
 ```bash
 sudo apt-get install zlib1g-dev
 ```
-
-## Custom Installation
-
-To install custom built SDPA binaries set the environmental variable `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`. For instance, if the libraries are installed in `/opt/lib`, then call
-```julia
-ENV["JULIA_SDPA_LIBRARY_PATH"] = "/opt/lib"
-import Pkg; Pkg.build("SDPA")
-```
-If you do not want BinaryProvider to download the default binaries on install, set `JULIA_SDPA_LIBRARY_PATH` before calling `import Pkg; Pkg.add("SDPA")`.
-
-To switch back to the default binaries clear `JULIA_SDPA_LIBRARY_PATH` and call `import Pkg; Pkg.build("SDPA")`.
 
 [build-img]: https://github.com/jump-dev/SDPA.jl/workflows/CI/badge.svg?branch=master
 [build-url]: https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI
