@@ -17,22 +17,10 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
     solve_time::Float64
     silent::Bool
     options::Dict{Symbol, Any}
-    function Optimizer(; kwargs...)
+    function Optimizer()
 		optimizer = new(
             zero(Cdouble), 1, Int[], Tuple{Int, Int, Int}[], Cdouble[],
             nothing, false, NaN, false, Dict{Symbol, Any}())
-        if !isempty(kwargs)
-            @warn("""Passing optimizer attributes as keyword arguments to
-            SDPA.Optimizer is deprecated. Use
-                MOI.set(model, MOI.RawOptimizerAttribute("key"), value)
-            or
-                JuMP.set_optimizer_attribute(model, "key", value)
-            instead.
-            """)
-        end
-		for (key, value) in kwargs
-			MOI.set(optimizer, MOI.RawOptimizerAttribute(key), value)
-		end
 		return optimizer
     end
 end
