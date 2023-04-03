@@ -1,30 +1,89 @@
-# SDPA
+# SDPA.jl
 
-| **Build Status** | **References to cite** |
-|:----------------:|:----------------------:|
-| [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
-| [![Codecov branch][codecov-img]][codecov-url] | |
+[![Build Status](https://github.com/jump-dev/SDPA.jl/workflows/CI/badge.svg?branch=master)](https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/jump-dev/SDPA.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jump-dev/SDPA.jl)
 
-Julia wrapper to [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver in double precision floating point arithmetics (i.e. `Float64`);
-see [SDPAFamily](https://github.com/ericphanson/SDPAFamily.jl) for the other solvers SDPA-GMP, SDPA-DD, and SDPA-QD of the family.
-Write `SDPA.Optimizer` to use this solver with [JuMP](github.com/jump-dev/JuMP.jl), [Convex](https://github.com/jump-dev/Convex.jl) or any other package using the [MathOptInterface](https://github.com/jump-dev/MathOptInterface.jl) interface.
+[SDPA.jl](https://github.com/jump-dev/SDPA.jl) is a wrapper for the
+[SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver in double
+precision floating point arithmetics.
 
-## Parameters
+## Affiliation
 
-SDPA has 10 parameters that can be set separately using, e.g. `SDPASolver(MaxIteration=100)` to set the parameter with name `MaxIteration` at the value 100.
-SDPA has 3 modes that give values to all 10 parameters. By default, we put SDPA in the `PARAMETER_DEFAULT` mode.
+This wrapper is maintained by the JuMP community and is not a product of the
+SDPA developers.
+
+## License
+
+`SDPA.jl` is licensed under the [MIT License](https://github.com/jump-dev/SDPA.jl/blob/master/LICENSE.md).
+
+The underlying solver, [SDPA](http://sdpa.sourceforge.net/) is licensed
+under the [GPL v2 license](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).
+
+## Installation
+
+Install SDPA using `Pkg.add`:
+```julia
+import Pkg
+Pkg.add("SDPA")
+```
+
+In addition to installing the SDPA.jl package, this will also download and
+install the SDPA binaries. (You do not need to install SDPA separately.)
+
+If you see an error similar to:
+```julia
+INFO: Precompiling module GZip.
+ERROR: LoadError: LoadError: error compiling anonymous: could not load library "libz"
+```
+please see [GZip.jl#54](https://github.com/JuliaIO/GZip.jl/issues/54) or [Flux.jl#343](https://github.com/FluxML/Flux.jl/issues/343). In particular, in Ubuntu this issue may be resolved by running
+```bash
+sudo apt-get install zlib1g-dev
+```
+
+See [SDPAFamily](https://github.com/ericphanson/SDPAFamily.jl) for the other
+solvers, SDPA-GMP, SDPA-DD, and SDPA-QD of the family.
+
+## Use with JuMP
+
+```julia
+using JuMP, SDPA
+model = Model(SDPA.Optimizer)
+set_attribute(model, "Mode", SDPA.PARAMETER_DEFAULT)
+```
+
+## MathOptInterface API
+
+The SDPA optimizer supports the following constraints and attributes.
+
+List of supported objective functions:
+
+ * [`MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}`](@ref)
+
+List of supported variable types:
+
+ * [`MOI.Nonnegatives`](@ref)
+ * [`MOI.PositiveSemidefiniteConeTriangle`](@ref)
+
+List of supported constraint types:
+
+ * [`MOI.ScalarAffineFunction{Float64}`](@ref) in [`MOI.EqualTo{Float64}`](@ref)
+
+List of supported model attributes:
+
+ * [`MOI.ObjectiveSense()`](@ref)
+
+## Options
+
+SDPA has 3 modes that give values to all 10 parameters. By default, we put SDPA
+in the `PARAMETER_DEFAULT` mode.
+
 The three modes are as follow:
 
 | Mode    | Name                          |
 | ------- | ----------------------------- |
-| Default | `PARAMETER_DEFAULT`           |
-| Fast    | `PARAMETER_UNSTABLE_BUT_FAST` |
-| Slow    | `PARAMETER_STABLE_BUT_SLOW`   |
-
-To set the SDPA solver in a mode you do, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST)`.
-Note that the parameters are set in the order they are given so you can set it in a mode and then modify one parameter from this mode, e.g. `SDPASolver(Mode=PARAMETER_UNSTABLE_BUT_FAST, MaxIteration=1000)`.
-
-Note that `PARAMETER_UNSTABLE_BUT_FAST` appears to be the most reliable of the three modes, at least in some cases; e.g. it gives the fewest failures on Convex.jl's tests (see [#17](https://github.com/jump-dev/SDPA.jl/issues/17#issuecomment-502045684)).
+| Default | `SDPA.PARAMETER_DEFAULT`           |
+| Fast    | `SDPA.PARAMETER_UNSTABLE_BUT_FAST` |
+| Slow    | `SDPA.PARAMETER_STABLE_BUT_SLOW`   |
 
 The following table gives the default value for each parameter.
 
@@ -41,30 +100,12 @@ The following table gives the default value for each parameter.
 | GammaStar      | 0.9     | 0.95   | 0.8    |
 | EpsilonDash    | 1.0e-7  | 1.0e-7 | 1.0e-7 |
 
-## Installation
+Note that the parameters are set in the order they are given, so you can set it
+in a mode and then modify one parameter from this mode.
 
-Install SDPA using `Pkg.add`:
 ```julia
-import Pkg; Pkg.add("SDPA")
+using JuMP, SDPA
+model = Model(SDPA.Optimizer)
+set_attribute(model, "Mode", SDPA.PARAMETER_STABLE_BUT_SLOW)
+set_attribute(model, "MaxIteration", 100)
 ```
-
-In addition to installing the SDPA.jl package, this will also download and
-install the SDPA binaries. (You do not need to install SDPA separately.)
-
-*NOTE:* If you see an error similar to
-```julia
-INFO: Precompiling module GZip.
-ERROR: LoadError: LoadError: error compiling anonymous: could not load library "libz"
-```
-please see [GZip.jl#54](https://github.com/JuliaIO/GZip.jl/issues/54) or [Flux.jl#343](https://github.com/FluxML/Flux.jl/issues/343). In particular, in Ubuntu this issue may be resolved by running
-```bash
-sudo apt-get install zlib1g-dev
-```
-
-[build-img]: https://github.com/jump-dev/SDPA.jl/workflows/CI/badge.svg?branch=master
-[build-url]: https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI
-[codecov-img]: http://codecov.io/github/jump-dev/SDPA.jl/coverage.svg?branch=master
-[codecov-url]: http://codecov.io/github/jump-dev/SDPA.jl?branch=master
-
-[zenodo-url]: https://doi.org/10.5281/zenodo.1285668
-[zenodo-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.1285668.svg
