@@ -5,7 +5,7 @@
 
 [SDPA.jl](https://github.com/jump-dev/SDPA.jl) is a wrapper for the
 [SDPA](http://sdpa.sourceforge.net/) semidefinite programming solver in double
-precision floating point arithmetics.
+precision floating point arithmetic.
 
 ## Affiliation
 
