@@ -1,10 +1,13 @@
+# Copyright (c) 2016: Benoît Legat and SDPA.jl contributors
+#
+# Use of this source code is governed by an MIT-style license that can be found
+# in the LICENSE.md file or at https://opensource.org/licenses/MIT.
+
 module TestSDPA
 
 using Test
-using MathOptInterface
+import MathOptInterface as MOI
 import SDPA
-
-const MOI = MathOptInterface
 
 function runtests()
     for name in names(@__MODULE__; all = true)
@@ -19,37 +22,41 @@ end
 
 function test_solver_name()
     @test MOI.get(SDPA.Optimizer(), MOI.SolverName()) == "SDPA"
+    return
 end
 
 function test_options()
     param = MOI.RawOptimizerAttribute("bad_option")
     err = MOI.UnsupportedAttribute(param)
     model = SDPA.Optimizer()
-    @test_throws err MOI.set(
-        model,
-        MOI.RawOptimizerAttribute("bad_option"),
-        0,
-    )
+    @test_throws err MOI.set(model, MOI.RawOptimizerAttribute("bad_option"), 0)
     MOI.set(model, MOI.RawOptimizerAttribute("Mode"), SDPA.PARAMETER_DEFAULT)
-    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) == SDPA.PARAMETER_DEFAULT
-    MOI.set(model, MOI.RawOptimizerAttribute("Mode"), SDPA.PARAMETER_UNSTABLE_BUT_FAST)
-    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) == SDPA.PARAMETER_UNSTABLE_BUT_FAST
+    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) ==
+          SDPA.PARAMETER_DEFAULT
+    MOI.set(
+        model,
+        MOI.RawOptimizerAttribute("Mode"),
+        SDPA.PARAMETER_UNSTABLE_BUT_FAST,
+    )
+    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) ==
+          SDPA.PARAMETER_UNSTABLE_BUT_FAST
+    return
 end
 
 function test_runtests()
     model = MOI.Utilities.CachingOptimizer(
         MOI.Utilities.UniversalFallback(MOI.Utilities.Model{Float64}()),
-        MOI.instantiate(SDPA.Optimizer, with_bridge_type = Float64),
+        MOI.instantiate(SDPA.Optimizer; with_bridge_type = Float64),
     )
     # `Variable.ZerosBridge` makes dual needed by some tests fail.
     MOI.Bridges.remove_bridge(
         model.optimizer,
-        MathOptInterface.Bridges.Variable.ZerosBridge{Float64},
+        MOI.Bridges.Variable.ZerosBridge{Float64},
     )
     MOI.set(model, MOI.Silent(), true)
     MOI.Test.runtests(
         model,
-        MOI.Test.Config(
+        MOI.Test.Config(;
             rtol = 1e-3,
             atol = 1e-3,
             exclude = Any[
@@ -58,7 +65,7 @@ function test_runtests()
                 MOI.ObjectiveBound,
                 MOI.SolverVersion,
             ],
-        ),
+        );
         exclude = String[
             # Unable to bridge RotatedSecondOrderCone to PSD because the dimension is too small: got 2, expected >= 3.
             "test_conic_SecondOrderCone_INFEASIBLE",
