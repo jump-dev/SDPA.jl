@@ -21,7 +21,3 @@ function block(X::BlockSolution, blk::Integer)
         Diagonal(unsafe_wrap(Array, getptr(X, blk), (n,)))
     end
 end
-# Needed by MPB_wrapper
-function Base.getindex(A::BlockSolution, i::Integer)
-    block(A, i)
-end
