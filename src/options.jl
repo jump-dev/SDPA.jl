@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-const SET_PARAM = Dict(
+const _SET_PARAM = Dict(
     :Mode => setParameterType,
     :MaxIteration => setParameterMaxIteration,
     :EpsilonStar => setParameterEpsilonStar,
@@ -17,9 +17,9 @@ const SET_PARAM = Dict(
     :EpsilonDash => setParameterEpsilonDash,
 )
 
-function setparameters!(problem, options)
+function _set_parameters(problem, options)
     for (optname, optval) in options
-        SET_PARAM[optname](problem, optval)
+        _SET_PARAM[optname](problem, optval)
     end
     return
 end
