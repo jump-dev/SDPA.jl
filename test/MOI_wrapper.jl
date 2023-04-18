@@ -26,20 +26,17 @@ function test_solver_name()
 end
 
 function test_options()
-    param = MOI.RawOptimizerAttribute("bad_option")
-    err = MOI.UnsupportedAttribute(param)
     model = SDPA.Optimizer()
-    @test_throws err MOI.set(model, MOI.RawOptimizerAttribute("bad_option"), 0)
-    MOI.set(model, MOI.RawOptimizerAttribute("Mode"), SDPA.PARAMETER_DEFAULT)
-    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) ==
-          SDPA.PARAMETER_DEFAULT
-    MOI.set(
-        model,
-        MOI.RawOptimizerAttribute("Mode"),
-        SDPA.PARAMETER_UNSTABLE_BUT_FAST,
-    )
-    @test MOI.get(model, MOI.RawOptimizerAttribute("Mode")) ==
-          SDPA.PARAMETER_UNSTABLE_BUT_FAST
+    attr_bad = MOI.RawOptimizerAttribute("bad_option")
+    err = MOI.UnsupportedAttribute(attr_bad)
+    @test_throws err MOI.get(model, attr_bad)
+    @test_throws err MOI.set(model, attr_bad, 0)
+    attr_mode = MOI.RawOptimizerAttribute("Mode")
+    @test MOI.get(model, attr_mode) === nothing
+    MOI.set(model, attr_mode, SDPA.PARAMETER_DEFAULT)
+    @test MOI.get(model, attr_mode) == SDPA.PARAMETER_DEFAULT
+    MOI.set(model, attr_mode, SDPA.PARAMETER_UNSTABLE_BUT_FAST)
+    @test MOI.get(model, attr_mode) == SDPA.PARAMETER_UNSTABLE_BUT_FAST
     return
 end
 

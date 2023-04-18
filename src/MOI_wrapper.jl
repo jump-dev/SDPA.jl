@@ -47,8 +47,10 @@ function MOI.set(optimizer::Optimizer, param::MOI.RawOptimizerAttribute, value)
 end
 
 function MOI.get(optimizer::Optimizer, param::MOI.RawOptimizerAttribute)
-    # TODO: This gives a poor error message if the name of the parameter is invalid.
-    return optimizer.options[Symbol(param.name)]
+    if !MOI.supports(optimizer, param)
+        throw(MOI.UnsupportedAttribute(param))
+    end
+    return get(optimizer.options, Symbol(param.name), nothing)
 end
 
 MOI.supports(::Optimizer, ::MOI.Silent) = true
