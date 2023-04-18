@@ -61,7 +61,7 @@ MOI.get(optimizer::Optimizer, ::MOI.Silent) = optimizer.silent
 MOI.get(::Optimizer, ::MOI.SolverName) = "SDPA"
 
 # FIXME `hash` needs this, this should be fixed upstream in CxxWrap
-Base.hash(p::PhaseType, u::UInt64) = hash(convert(Int32, p), u)
+Base.hash(p::PhaseType, u::UInt) = hash(convert(Int32, p), u)
 
 # See https://www.researchgate.net/publication/247456489_SDPA_SemiDefinite_Programming_Algorithm_User's_Manual_-_Version_600
 # "SDPA (SemiDefinite Programming Algorithm) User's Manual — Version 6.00" Section 6.2
