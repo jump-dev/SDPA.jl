@@ -74,34 +74,34 @@ List of supported model attributes:
 
 ## Options
 
-SDPA has 3 modes that give values to all 10 parameters. By default, we put SDPA
-in the `PARAMETER_DEFAULT` mode.
+SDPA has three modes that give default value to all ten parameters.
 
-The three modes are as follow:
+The following table gives the default values for each parameter and mode.
 
-| Mode    | Name                          |
-| ------- | ----------------------------- |
-| Default | `SDPA.PARAMETER_DEFAULT`           |
-| Fast    | `SDPA.PARAMETER_UNSTABLE_BUT_FAST` |
-| Slow    | `SDPA.PARAMETER_STABLE_BUT_SLOW`   |
+| Parameter    | `PARAMETER_DEFAULT` | `PARAMETER_UNSTABLE_BUT_FAST` | `PARAMETER_STABLE_BUT_SLOW` |
+| ------------ | ------- | ------ | ------ |
+| MaxIteration | 100     | 100    | 1000   |
+| EpsilonStar  | 1.0e-7  | 1.0e-7 | 1.0e-7 |
+| LambdaStar   | 1.0e+2  | 1.0e+2 | 1.0e+4 |
+| OmegaStar    | 2.0     | 2.0    | 2.0    |
+| LowerBound   | 1.0e+5  | 1.0e+5 | 1.0e+5 |
+| UpperBound   | 1.0e+5  | 1.0e+5 | 1.0e+5 |
+| BetaStar     | 0.1     | 0.01   | 0.1    |
+| BetaBar      | 0.2     | 0.02   | 0.3    |
+| GammaStar    | 0.9     | 0.95   | 0.8    |
+| EpsilonDash  | 1.0e-7  | 1.0e-7 | 1.0e-7 |
 
-The following table gives the default value for each parameter.
+By default, we put SDPA in the `SDPA.PARAMETER_DEFAULT` mode.
 
-| Parameter name | Default | Fast   | Slow   |
-| -------------- | ------- | ------ | ------ |
-| MaxIteration   | 100     | 100    | 1000   |
-| EpsilonStar    | 1.0e-7  | 1.0e-7 | 1.0e-7 |
-| LambdaStar     | 1.0e+2  | 1.0e+2 | 1.0e+4 |
-| OmegaStar      | 2.0     | 2.0    | 2.0    |
-| LowerBound     | 1.0e+5  | 1.0e+5 | 1.0e+5 |
-| UpperBound     | 1.0e+5  | 1.0e+5 | 1.0e+5 |
-| BetaStar       | 0.1     | 0.01   | 0.1    |
-| BetaBar        | 0.2     | 0.02   | 0.3    |
-| GammaStar      | 0.9     | 0.95   | 0.8    |
-| EpsilonDash    | 1.0e-7  | 1.0e-7 | 1.0e-7 |
+Change the mode using the `"Mode"` option:
+```julia
+using JuMP, SDPA
+model = Model(SDPA.Optimizer)
+set_attribute(model, "Mode", SDPA.PARAMETER_STABLE_BUT_SLOW)
+```
 
-Note that the parameters are set in the order they are given, so you can set it
-in a mode and then modify one parameter from this mode.
+Note that the parameters are set in the order they are given, so you can set
+a mode and then modify parameters from this mode.
 
 ```julia
 using JuMP, SDPA
@@ -109,3 +109,8 @@ model = Model(SDPA.Optimizer)
 set_attribute(model, "Mode", SDPA.PARAMETER_STABLE_BUT_SLOW)
 set_attribute(model, "MaxIteration", 100)
 ```
+
+The choice of parameter mode has a large impact on the performance
+and stability of SDPA. You should try each mode to see how it performs on
+your specific problem. See [SDPA.jl#17](https://github.com/jump-dev/SDPA.jl/issues/17)
+for more details.
