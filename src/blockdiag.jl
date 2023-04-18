@@ -5,12 +5,12 @@
 
 abstract type AbstractBlockMatrix{T} <: AbstractMatrix{T} end
 
-function nblocks end
+function _n_blocks end
 
 function block end
 
 function Base.size(bm::AbstractBlockMatrix)
-    n = mapreduce(+, 1:nblocks(bm); init = 0) do blk
+    n = mapreduce(+, 1:_n_blocks(bm); init = 0) do blk
         return LinearAlgebra.checksquare(block(bm, blk))
     end
     return (n, n)
@@ -19,7 +19,7 @@ function Base.getindex(bm::AbstractBlockMatrix, i::Integer, j::Integer)
     if (i < 0 || j < 0)
         throw(BoundsError(i, j))
     end
-    for k in 1:nblocks(bm)
+    for k in 1:_n_blocks(bm)
         blk = block(bm, k)
         n = size(blk, 1)
         if i <= n && j <= n
