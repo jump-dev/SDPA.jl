@@ -110,7 +110,9 @@ set_attribute(model, "Mode", SDPA.PARAMETER_STABLE_BUT_SLOW)
 set_attribute(model, "MaxIteration", 100)
 ```
 
-The choice of parameter mode has a large impact on the performance
-and stability of SDPA. You should try each mode to see how it performs on
-your specific problem. See [SDPA.jl#17](https://github.com/jump-dev/SDPA.jl/issues/17)
+The choice of parameter mode has a large impact on the performance and stability
+of SDPA, and not necessarily in the way implied by the names of the modes; for
+example, `PARAMETER_UNSTABLE_BUT_FAST` can be more stable than the other modes
+for some problems. You should try each mode to see how it performs on your
+specific problem. See [SDPA.jl#17](https://github.com/jump-dev/SDPA.jl/issues/17)
 for more details.
