@@ -15,7 +15,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
     silent::Bool
     options::Dict{Symbol,Any}
 
-    function Optimizer(; kwargs...)
+    function Optimizer()
         return new(
             zero(Cdouble),
             1,
@@ -34,7 +34,7 @@ end
 varmap(optimizer::Optimizer, vi::MOI.VariableIndex) = optimizer.varmap[vi.value]
 
 function MOI.supports(optimizer::Optimizer, param::MOI.RawOptimizerAttribute)
-    return Symbol(param.name) in keys(SET_PARAM)
+    return haskey(SET_PARAM, Symbol(param.name))
 end
 
 function MOI.set(optimizer::Optimizer, param::MOI.RawOptimizerAttribute, value)
@@ -52,8 +52,10 @@ end
 MOI.supports(::Optimizer, ::MOI.Silent) = true
 
 function MOI.set(optimizer::Optimizer, ::MOI.Silent, value::Bool)
-    return optimizer.silent = value
+    optimizer.silent = value
+    return
 end
+
 MOI.get(optimizer::Optimizer, ::MOI.Silent) = optimizer.silent
 
 MOI.get(::Optimizer, ::MOI.SolverName) = "SDPA"
@@ -107,7 +109,7 @@ function MOI.empty!(optimizer::Optimizer)
 end
 
 function MOI.supports(
-    optimizer::Optimizer,
+    ::Optimizer,
     ::Union{
         MOI.ObjectiveSense,
         MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}},
@@ -169,7 +171,7 @@ end
 function _error(start, stop)
     return error(
         start,
-        ". Use `MOI.instantiate(SDPA.Optimizer, with_bridge_type = Float64)` ",
+        ". Use `MOI.instantiate(SDPA.Optimizer; with_bridge_type = Float64)` ",
         stop,
     )
 end
@@ -220,7 +222,6 @@ end
 function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
     MOI.empty!(dest)
     index_map = MOI.Utilities.IndexMap()
-
     # Step 1) Compute the dimensions of what needs to be allocated
     constrain_variables_on_creation(dest, src, index_map, MOI.Nonnegatives)
     constrain_variables_on_creation(
@@ -236,42 +237,27 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
             "to bridge free variables into `x - y` where `x` and `y` are nonnegative.",
         )
     end
-    cis_src = MOI.get(
-        src,
-        MOI.ListOfConstraintIndices{
-            MOI.ScalarAffineFunction{Cdouble},
-            MOI.EqualTo{Cdouble},
-        }(),
-    )
+    F, S = MOI.ScalarAffineFunction{Cdouble}, MOI.EqualTo{Cdouble}
+    cis_src = MOI.get(src, MOI.ListOfConstraintIndices{F,S}())
     dest.b = Vector{Cdouble}(undef, length(cis_src))
-    funcs = Vector{MOI.ScalarAffineFunction{Cdouble}}(undef, length(cis_src))
+    funcs = Vector{F}(undef, length(cis_src))
     for (k, ci_src) in enumerate(cis_src)
         funcs[k] = MOI.get(src, MOI.CanonicalConstraintFunction(), ci_src)
         set = MOI.get(src, MOI.ConstraintSet(), ci_src)
         if !iszero(MOI.constant(funcs[k]))
             throw(
-                MOI.ScalarFunctionConstantNotZero{
-                    Cdouble,
-                    MOI.ScalarAffineFunction{Cdouble},
-                    MOI.EqualTo{Cdouble},
-                }(
+                MOI.ScalarFunctionConstantNotZero{Cdouble,F,S}(
                     MOI.constant(funcs[k]),
                 ),
             )
         end
         dest.b[k] = MOI.constant(set)
-        index_map[ci_src] = MOI.ConstraintIndex{
-            MOI.ScalarAffineFunction{Cdouble},
-            MOI.EqualTo{Cdouble},
-        }(
-            k,
-        )
+        index_map[ci_src] = MOI.ConstraintIndex{F,S}(k)
     end
-
     # Step 2) Allocate SDPA datastructures
     dummy = isempty(dest.b)
     if dummy
-        dest.b = [one(Cdouble)]
+        dest.b = [1.0]
         dest.blockdims = [dest.blockdims; -1]
     end
     dest.problem = SDPAProblem()
@@ -289,17 +275,8 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
         inputCVec(dest.problem, i, dest.b[i])
     end
     if dummy
-        inputElement(
-            dest.problem,
-            1,
-            length(dest.blockdims),
-            1,
-            1,
-            one(Cdouble),
-            false,
-        )
+        inputElement(dest.problem, 1, length(dest.blockdims), 1, 1, 1.0, false)
     end
-
     # Step 3) Load data in the datastructures
     for k in eachindex(funcs)
         for term in funcs[k].terms
@@ -313,16 +290,13 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
             end
         end
     end
-
     MOI.Utilities.pass_attributes(dest, src, index_map, vis_src)
-    # Throw error for constraint attributes
     MOI.Utilities.pass_attributes(dest, src, index_map, cis_src)
-
     # Pass objective attributes and throw error for other ones
     model_attributes = MOI.get(src, MOI.ListOfModelAttributesSet())
+    obj_attr = MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}}()
     for attr in model_attributes
-        if attr != MOI.ObjectiveSense() &&
-           attr != MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}}()
+        if attr != MOI.ObjectiveSense() && attr != obj_attr
             throw(MOI.UnsupportedAttribute(attr))
         end
     end
@@ -331,12 +305,8 @@ function MOI.copy_to(dest::Optimizer, src::MOI.ModelLike)
         sense = MOI.get(src, MOI.ObjectiveSense())
         dest.objective_sign = sense == MOI.MIN_SENSE ? -1 : 1
     end
-    if MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}}() in
-       model_attributes
-        func = MOI.get(
-            src,
-            MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Cdouble}}(),
-        )
+    if obj_attr in model_attributes
+        func = MOI.get(src, obj_attr)
         obj = MOI.Utilities.canonical(func)
         dest.objective_constant = obj.constant
         for term in obj.terms
@@ -388,7 +358,8 @@ function MOI.get(m::Optimizer, ::MOI.TerminationStatus)
         return MOI.OPTIMAL
     elseif status == pUNBD
         return MOI.DUAL_INFEASIBLE
-    elseif status == dUNBD
+    else
+        @assert status == dUNBD
         return MOI.INFEASIBLE
     end
 end
@@ -416,7 +387,8 @@ function MOI.get(m::Optimizer, attr::MOI.PrimalStatus)
         return MOI.FEASIBLE_POINT
     elseif status == pUNBD
         return MOI.INFEASIBILITY_CERTIFICATE
-    elseif status == dUNBD
+    else
+        @assert status == dUNBD
         return MOI.INFEASIBLE_POINT
     end
 end
@@ -444,7 +416,8 @@ function MOI.get(m::Optimizer, attr::MOI.DualStatus)
         return MOI.FEASIBLE_POINT
     elseif status == pUNBD
         return MOI.INFEASIBLE_POINT
-    elseif status == dUNBD
+    else
+        @assert status == dUNBD
         return MOI.INFEASIBILITY_CERTIFICATE
     end
 end
