@@ -28,7 +28,7 @@ end
 function test_options()
     model = SDPA.Optimizer()
     attr_bad = MOI.RawOptimizerAttribute("bad_option")
-    err = MOI.UnsupportedAttribute(param)
+    err = MOI.UnsupportedAttribute(attr_bad)
     @test_throws err MOI.get(model, attr_bad)
     @test_throws err MOI.set(model, attr_bad, 0)
     attr_mode = MOI.RawOptimizerAttribute("Mode")
