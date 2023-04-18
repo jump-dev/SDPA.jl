@@ -1,21 +1,27 @@
+# Copyright (c) 2016: Benoît Legat and SDPA.jl contributors
+#
+# Use of this source code is governed by an MIT-style license that can be found
+# in the LICENSE.md file or at https://opensource.org/licenses/MIT.
+
 module SDPA
 
-using CxxWrap
+using CxxWrap  # CxxWrap doesn't have good hygiene so this must be using.
+import LinearAlgebra
+import MathOptInterface as MOI
+import SDPA_jll
 
-# This 'using' is required to suppress a warning about SDPA not having Libdl in its
-# dependencies (Libdl is used by BinaryProvider), e.g.: bicycle1885/CodecZlib.jl#26.
-using Libdl
-
-import SDPA_jll: libsdpawrap_path, libsdpawrap
-@wrapmodule(libsdpawrap_path)
+CxxWrap.@wrapmodule(SDPA_jll.libsdpawrap_path)
 
 function __init__()
-    @initcxx
+    CxxWrap.@initcxx
+    return
 end
 
 include("blockdiag.jl")
 include("blockmat.jl")
 include("options.jl")
 include("MOI_wrapper.jl")
+
+export PARAMETER_DEFAULT, PARAMETER_UNSTABLE_BUT_FAST, PARAMETER_STABLE_BUT_SLOW
 
 end # module

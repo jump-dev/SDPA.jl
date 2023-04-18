@@ -1,6 +1,14 @@
+# Copyright (c) 2016: Benoît Legat and SDPA.jl contributors
+#
+# Use of this source code is governed by an MIT-style license that can be found
+# in the LICENSE.md file or at https://opensource.org/licenses/MIT.
+
+import SDPA
+using Test
+
 # Inspired from example1.cpp from SDPA
 p = SDPA.SDPAProblem()
-mDIM   = 3
+mDIM = 3
 nBlock = 1
 SDPA.inputConstraintNumber(p, mDIM)
 SDPA.inputBlockNumber(p, nBlock)
@@ -13,16 +21,16 @@ SDPA.inputCVec(p, 1, 48)
 SDPA.inputCVec(p, 2, -8)
 SDPA.inputCVec(p, 3, 20)
 
-SDPA.inputElement(p, 0, 1, 1, 1, -11., false)
-SDPA.inputElement(p, 0, 1, 2, 2,  23., false)
+SDPA.inputElement(p, 0, 1, 1, 1, -11.0, false)
+SDPA.inputElement(p, 0, 1, 2, 2, 23.0, false)
 
-SDPA.inputElement(p, 1, 1, 1, 1,  10., false)
-SDPA.inputElement(p, 1, 1, 1, 2,   4., false)
+SDPA.inputElement(p, 1, 1, 1, 1, 10.0, false)
+SDPA.inputElement(p, 1, 1, 1, 2, 4.0, false)
 
-SDPA.inputElement(p, 2, 1, 2, 2,  -8., false)
+SDPA.inputElement(p, 2, 1, 2, 2, -8.0, false)
 
-SDPA.inputElement(p, 3, 1, 1, 2,  -8., false)
-SDPA.inputElement(p, 3, 1, 2, 2,  -2., false)
+SDPA.inputElement(p, 3, 1, 1, 2, -8.0, false)
+SDPA.inputElement(p, 3, 1, 2, 2, -2.0, false)
 
 SDPA.initializeUpperTriangle(p, false)
 SDPA.initializeSolve(p)
