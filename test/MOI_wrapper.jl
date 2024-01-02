@@ -57,7 +57,7 @@ function test_runtests()
                 MOI.SolverVersion,
             ],
         );
-        exclude = String[
+        exclude = Regex[
             # Expression: MOI.get(model, MOI.TerminationStatus()) == MOI.INFEASIBLE
             #  Evaluated: MathOptInterface.INFEASIBLE_OR_UNBOUNDED == MathOptInterface.INFEASIBLE
             r"test_conic_NormInfinityCone_INFEASIBLE$",
