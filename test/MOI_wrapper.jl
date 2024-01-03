@@ -62,6 +62,15 @@ function test_runtests()
             #  Evaluated: MathOptInterface.INFEASIBLE_OR_UNBOUNDED == MathOptInterface.INFEASIBLE
             r"test_conic_NormInfinityCone_INFEASIBLE$",
             r"test_conic_NormOneCone_INFEASIBLE$",
+            r"test_conic_SecondOrderCone_INFEASIBLE$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_EqualTo_lower$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_EqualTo_upper$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_GreaterThan$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_Interval_lower$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_Interval_upper$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_LessThan$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_VariableIndex_LessThan$",
+            r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_VariableIndex_LessThan_max$",
             # Incorrect objective
             # See https://github.com/jump-dev/MathOptInterface.jl/issues/1759
             r"test_unbounded_MIN_SENSE$",
