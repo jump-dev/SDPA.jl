@@ -10,7 +10,7 @@ import LinearAlgebra
 import MathOptInterface as MOI
 import SDPA_jll
 
-CxxWrap.@wrapmodule(SDPA_jll.libsdpawrap_path)
+CxxWrap.@wrapmodule(SDPA_jll.get_libsdpawrap_path)
 
 function __init__()
     CxxWrap.@initcxx
