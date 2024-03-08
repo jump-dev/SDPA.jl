@@ -4,7 +4,7 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 for f in filter(f -> endswith(f, ".jl"), readdir(@__DIR__))
-    if f == "runtests.jl"
+    if f != "runtests.jl"
         include(f)
     end
 end
