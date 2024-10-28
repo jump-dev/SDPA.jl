@@ -1,6 +1,6 @@
 # SDPA.jl
 
-[![Build Status](https://github.com/jump-dev/SDPA.jl/workflows/CI/badge.svg?branch=master)](https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI)
+[![Build Status](https://github.com/jump-dev/SDPA.jl/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jump-dev/SDPA.jl/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/jump-dev/SDPA.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jump-dev/SDPA.jl)
 
 [SDPA.jl](https://github.com/jump-dev/SDPA.jl) is a wrapper for the
@@ -48,6 +48,7 @@ solvers, SDPA-GMP, SDPA-DD, and SDPA-QD of the family.
 ```julia
 using JuMP, SDPA
 model = Model(SDPA.Optimizer)
+# Optionally set parameters, for example:
 set_attribute(model, "Mode", SDPA.PARAMETER_DEFAULT)
 ```
 
