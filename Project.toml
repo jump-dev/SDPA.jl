@@ -10,10 +10,10 @@ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 SDPA_jll = "7fc90fd6-dbef-5a6a-93f8-169f2a2e705b"
 
 [compat]
-CxxWrap = "0.14"
+CxxWrap = "0.16"
 LinearAlgebra = "<0.0.1, 1.6"
 MathOptInterface = "1"
-SDPA_jll = "=700.300.1701"
+SDPA_jll = "=700.300.1800"
 SparseArrays = "<0.0.1, 1.6"
 Test = "<0.0.1, 1.6"
 julia = "1.6"
